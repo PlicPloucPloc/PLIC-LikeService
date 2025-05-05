@@ -1,5 +1,6 @@
 import Elysia, { t } from "elysia";
 import { bearer } from "@elysiajs/bearer";
+import { addRelation } from "../services/likeService";
 
 const likeRoutes = new Elysia({prefix: "/relations"});
 
@@ -38,7 +39,11 @@ likeRoutes.use(bearer()).get('/dislikes', ({ bearer }) => bearer, {
     }
 })
 
-likeRoutes.use(bearer()).post('/', ({ bearer, body }) => bearer + body, {
+likeRoutes.use(bearer()).post('/', ({ bearer, body }) => {
+    console.log("Trying to like: " + bearer);
+    addRelation(bearer, body.aptId, body.isLike);
+    return "OK";
+}, {
     body : t.Object({
         aptId: t.String(),
         isLike: t.Boolean()
