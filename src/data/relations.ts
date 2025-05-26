@@ -1,6 +1,6 @@
 import { driver } from "../libs/neo4j";
 
-async function getUser(userId:string){
+async function getUserNode(userId:string){
     try {
             const { records, summary, keys } = await driver.executeQuery(
             "MATCH (u:Person {id:\'" + userId + "\'}) RETURN u"
@@ -37,9 +37,10 @@ async function getRelation(userId:string, aptId:string){
 }
 
 async function getRelations(userId:string){
+    console.log("Fetching data")
     try {
         const { records } = await driver.executeQuery(
-            "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r"
+            "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r, a"
         )
         return records;
     } catch(err : any) {
@@ -148,4 +149,4 @@ async function removeRelation(userId: string, aptId: string) {
 }
 
 
-export {getUser, getAppartment, getRelation, addUser, addAppartment, addLike, addDislike, removeUser, removeAppartment, removeRelation, getRelations, getLikes};
+export {getUserNode, getAppartment, getRelation, addUser, addAppartment, addLike, addDislike, removeUser, removeAppartment, removeRelation, getRelations, getLikes};

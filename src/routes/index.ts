@@ -1,14 +1,16 @@
 import Elysia, { t } from "elysia";
 import { bearer } from "@elysiajs/bearer";
-import { addRelation, deleteRelation, updateRelation } from "../services/likeService";
+import { addRelation, deleteRelation, updateRelation, getAllRelations, getAllLikes } from "../services/likeService";
 
 const likeRoutes = new Elysia({prefix: "/relations"});
 
-likeRoutes.use(bearer()).get('/all', ({ bearer }) => {
-    return getAllRealtions(bearer);
+likeRoutes.use(bearer()).get('/all', async ({ bearer }) => {
+    console.log("Getting all relations for user: ", bearer);
+    return await getAllRelations(bearer);
 }, {
     beforeHandle({ bearer, set, error }) {
         if (!bearer) {
+            console.log("Bearer found");
             set.headers[
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
@@ -97,9 +99,3 @@ likeRoutes.use(bearer()).delete('/', ({ bearer, body }) => {
 })
 
 export {likeRoutes};
-    function getAllLikes(bearer: any): any {
-        throw new Error("Function not implemented.");
-    }
-function getAllRealtions(bearer: any): any {
-    throw new Error("Function not implemented.");
-}

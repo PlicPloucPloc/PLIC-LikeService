@@ -1,4 +1,4 @@
-import { addAppartment, addUser, addLike, addDislike, getAppartment,  removeRelation, getRelation, getRelations, getLikes, getUserNode } from "../data/relations";
+import { addAppartment, addUser, addLike, addDislike, getAppartment,  removeRelation, getRelation, getRelations, getLikes } from "../data/relations";
 import { HttpError } from "elysia-http-error";
 import { getUser } from "../data/users";
 
@@ -7,9 +7,7 @@ async function addRelation(bearer : string, aptId : string, isLike : boolean){
     if(!userId) {
         throw HttpError.Unauthorized("User do not exist");
     }
-    if (!((await getUserNode(userId)).length > 0)){
-        addUser(userId);
-    }
+    addUser(userId);
     console.log("Adding relation: " +  userId + " : " + aptId + " : " + isLike);
     if ((await getAppartment(aptId)).length == 0){
         console.log("Creating Apt : " + aptId);
@@ -72,11 +70,7 @@ async function getAllRelations(bearer : string) {
     });
 }
 
-async function getAllLikes(bearer : string){
-    const userId = await getUser(bearer) 
-    if(!userId) {
-        throw HttpError.Unauthorized("User do not exist");
-    }
+async function getAllLikes(userId : string){
     const relations = await getLikes(userId);
     if (relations.length <= 0) {
         console.error("User not found");
