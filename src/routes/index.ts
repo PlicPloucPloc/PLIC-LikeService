@@ -1,16 +1,26 @@
 import Elysia, { t } from "elysia";
 import { bearer } from "@elysiajs/bearer";
-import { addRelation, deleteRelation, updateRelation, getAllRelations, getAllLikes } from "../services/likeService";
+import { addRelation, deleteRelation, updateRelation, getAllRelations, getAllLikes } from "../services/like_service";
+import { HttpError } from "elysia-http-error";
+import { getUser } from "../data/users";
 
 const likeRoutes = new Elysia({prefix: "/relations"});
 
 likeRoutes.use(bearer()).get('/all', async ({ bearer }) => {
-    console.log("Getting all relations for user: ", bearer);
-    return await getAllRelations(bearer);
+    try {
+        if (getUser(bearer) === undefined) {
+            return new HttpError('Forbidden: User not found',403);
+        }
+        return await getAllRelations(bearer);
+    } catch (error) {
+        if (error instanceof HttpError) {
+            return error;
+        }
+        throw error;
+    }
 }, {
     beforeHandle({ bearer, set, error }) {
         if (!bearer) {
-            console.log("Bearer found");
             set.headers[
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
@@ -20,8 +30,18 @@ likeRoutes.use(bearer()).get('/all', async ({ bearer }) => {
     }
 })
 
-likeRoutes.use(bearer()).get('/likes/:isFilterColoc', ({ bearer }) => {
-    return getAllLikes(bearer);
+likeRoutes.use(bearer()).get('/likes/:isFilterColoc', async ({ bearer }) => {
+    try {
+        if (getUser(bearer) === undefined) {
+            return new HttpError('Forbidden: User not found',403);
+        }
+        return await getAllLikes(bearer);
+    } catch (error) {
+        if (error instanceof HttpError) {
+            return error;
+        }
+        throw error;
+    }
 }, {
     beforeHandle({ bearer, set, error }) {
        if(!bearer) {
@@ -45,9 +65,19 @@ likeRoutes.use(bearer()).get('/dislikes', ({ bearer }) => bearer, {
     }
 })
 
-likeRoutes.use(bearer()).post('/', ({ bearer, body }) => {
-    addRelation(bearer, body.aptId, body.isLike);
-    return "OK";
+likeRoutes.use(bearer()).post('/', async ({ bearer, body }) => {
+    try {
+        if (getUser(bearer) === undefined) {
+            return new HttpError('Forbidden: User not found',403);
+        }
+        await addRelation(bearer, body.aptId, body.isLike);
+        return "OK";
+    } catch(error) {
+        if (error instanceof HttpError) {
+            return error;
+        }
+        throw error;
+    }
 }, {
     body : t.Object({
         aptId: t.String(),
@@ -63,9 +93,18 @@ likeRoutes.use(bearer()).post('/', ({ bearer, body }) => {
     }
 })
 
-likeRoutes.use(bearer()).put('/', ({ bearer, body }) => {
-    console.log("Trying to update");
-    return updateRelation(bearer, body.aptId, body.isLike);
+likeRoutes.use(bearer()).put('/', async ({ bearer, body }) => {
+    try {
+        if (getUser(bearer) === undefined) {
+            return new HttpError('Forbidden: User not found',403);
+        }
+        return await updateRelation(bearer, body.aptId, body.isLike);
+    } catch (error) {
+        if (error instanceof HttpError) {
+            return error;
+        }
+        throw error;
+    }
 }, {
     body : t.Object({
         aptId: t.String(),
@@ -82,7 +121,17 @@ likeRoutes.use(bearer()).put('/', ({ bearer, body }) => {
 })
 
 likeRoutes.use(bearer()).delete('/', ({ bearer, body }) => {
-    return deleteRelation(bearer, body.aptId);
+    try {
+        if (getUser(bearer) === undefined) {
+            return new HttpError('Forbidden: User not found',403);
+        }
+        return deleteRelation(bearer, body.aptId);
+    } catch(error) {
+        if (error instanceof HttpError) {
+            return error;
+        }
+        throw error;
+    }
 }, {
     body : t.Object({
         aptId: t.String(),
