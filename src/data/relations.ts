@@ -2,7 +2,7 @@ import { driver } from "../libs/neo4j";
 
 async function getUserNode(userId:string){
     try {
-            const { records, summary, keys } = await driver.executeQuery(
+            const { records } = await driver.executeQuery(
             "MATCH (u:Person {id:\'" + userId + "\'}) RETURN u"
         )
         return records;
@@ -12,9 +12,9 @@ async function getUserNode(userId:string){
     }
 }
 
-async function getAppartment(aptId:string){
+async function getApartment(aptId:number){
     try {
-        const { records, summary, keys } = await driver.executeQuery(
+        const { records } = await driver.executeQuery(
             "MATCH (a:Appartment {id:\'" + aptId + "\'}) RETURN a"
         )
         return records;
@@ -24,7 +24,7 @@ async function getAppartment(aptId:string){
     }
 }
 
-async function getRelation(userId:string, aptId:string){
+async function getRelation(userId:string, aptId:number){
     try {
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment {id: \'" + aptId + "\'})RETURN r"
@@ -37,7 +37,7 @@ async function getRelation(userId:string, aptId:string){
 }
 
 async function getRelations(userId:string){
-    console.log("Fetching data")
+    console.log("Fetching data for user: " + userId);
     try {
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r, a"
@@ -61,7 +61,19 @@ async function getLikes(userId:string){
     }
 }
 
-async function addUser(userId :string){
+async function getDislikes(userId:string){
+    try {
+        const { records } = await driver.executeQuery(
+            "MATCH (p:Person {id:\'" + userId + "\'})-[r:DISLIKE]->(a:Appartment) RETURN a"
+        )
+        return records;
+    } catch(err : any) {
+        console.error("Failed to get appartment: ", err.cause)
+        throw err;
+    }
+}
+
+async function addUser(userId :string) : Promise<void>{
     try {
         await driver.executeQuery(
             "Create (:Person {id:\'" + userId + "\'})"
@@ -70,10 +82,9 @@ async function addUser(userId :string){
         console.error("Failed to add user: ", err.cause)
         throw err;
     }
-    return "OK";
 }
 
-async function addAppartment(aptId :string){
+async function addAppartment(aptId : number) : Promise<void>{
     try {
         await driver.executeQuery(
             "Create (:Appartment {id:\'" + aptId + "\'})"
@@ -82,10 +93,9 @@ async function addAppartment(aptId :string){
         console.error("Failed to add appartment: ", err.cause)
         throw err;
     }
-    return "OK";
 }
 
-async function addLike(userId: string, aptId: string) {
+async function addLike(userId: string, aptId: number) : Promise<void>{
     try {
         await driver.executeQuery(
             "MATCH (u:Person {id:\'" + userId + "\'}), (a:Appartment {id:\'" + aptId + "\'}) " +
@@ -95,10 +105,9 @@ async function addLike(userId: string, aptId: string) {
         console.error("Failed to create relation: ", err.cause)
         throw err;
     }
-    return "OK";
 }
 
-async function addDislike(userId: string, aptId: string) {
+async function addDislike(userId: string, aptId: number) : Promise<void>{
     try {
         await driver.executeQuery(
             "MATCH (u:Person {id:\'" + userId + "\'}), (a:Appartment {id:\'" + aptId + "\'}) " +
@@ -108,7 +117,6 @@ async function addDislike(userId: string, aptId: string) {
         console.error("Failed to create relation: ", err.cause)
         throw err;
     }
-    return "OK";
 }
 
 async function removeUser(userId:string){
@@ -123,7 +131,7 @@ async function removeUser(userId:string){
     }
 }
 
-async function removeAppartment(aptId:string){
+async function removeAppartment(aptId:number){
     try {
         const { records } = await driver.executeQuery(
             "DELETE (a:Appartment {id:\'" + aptId + "\'}) RETURN a"
@@ -135,7 +143,7 @@ async function removeAppartment(aptId:string){
         throw err;
     }
 }
-async function removeRelation(userId: string, aptId: string) {
+async function removeRelation(userId: string, aptId: number) : Promise<void>{
     try {
         await driver.executeQuery(
             "MATCH (u:Person {id:\'" + userId + "\'})-[r]->(a:Appartment {id:\'" + aptId + "\'}) " +
@@ -145,8 +153,7 @@ async function removeRelation(userId: string, aptId: string) {
         console.error("Failed to create relation: ", err.cause)
         throw err;
     }
-    return "OK";
 }
 
 
-export {getUserNode, getAppartment, getRelation, addUser, addAppartment, addLike, addDislike, removeUser, removeAppartment, removeRelation, getRelations, getLikes};
+export {getUserNode, getApartment, getRelation, addUser, addAppartment, addLike, addDislike, removeUser, removeAppartment, removeRelation, getRelations, getLikes, getDislikes};

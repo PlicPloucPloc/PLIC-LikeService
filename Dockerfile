@@ -26,4 +26,3 @@ COPY tsconfig.json .
 CMD ["./bun", "src/index.ts"]
 
 EXPOSE 3000
-
