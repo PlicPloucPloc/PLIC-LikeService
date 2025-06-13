@@ -2,9 +2,11 @@ import { addAppartment, addUser, addLike, addDislike, getApartment,  removeRelat
 import { HttpError } from "elysia-http-error";
 import { getUser } from "../data/users";
 import { fetchApartment } from "../data/apartments";
+import { relation } from "../models/relation";
+import { relation_type } from "../models/relation_type";
 
 async function addRelation(bearer : string, aptId : number, isLike : boolean) :Promise<void>{
-    const userId = await getUser(bearer) 
+    const userId = await getUser(bearer)
     if(!userId) {
         throw HttpError.Unauthorized("User do not exist");
     }
@@ -37,7 +39,7 @@ async function deleteRelation(bearer : string, aptId : number) : Promise<void>{
     if(!userId) {
         throw HttpError.Unauthorized("User do not exist");
     }
-    if ((await getApartment(aptId)).length == 0  || (await getUser(userId)).length == 0){
+    if ((await getApartment(aptId)).length == 0  || (await getUserNode(userId)).length == 0){
         console.error("Relation not found");
         throw HttpError.NotFound("Relation not found");
     }
@@ -49,12 +51,17 @@ async function updateRelation(bearer : string, aptId : number, isLike : boolean)
     if(!userId) {
         throw HttpError.Unauthorized("User do not exist");
     }
-    if ((await getApartment(aptId)).length == 0  || (await getUser(userId)).length == 0){
+    if ((await getApartment(aptId)).length == 0  || (await getUserNode(userId)).length == 0){
         console.error("Relation not found");
         throw HttpError.NotFound("Relation not found");
     }
     await removeRelation(userId, aptId);
-    await addRelation(userId, aptId, isLike)
+    if (isLike) {
+        await addLike(userId, aptId);
+    }
+    else {
+        await addDislike(userId, aptId);
+    }
 }
 
 async function getAllRelations(bearer : string) : Promise<relation[]>{

@@ -2,7 +2,6 @@ import Elysia, { t } from "elysia";
 import { bearer } from "@elysiajs/bearer";
 import { addRelation, deleteRelation, updateRelation, getAllRelations, getAllLikes, getAllDislikes } from "../services/like_service";
 import { HttpError } from "elysia-http-error";
-import { getUser } from "../data/users";
 
 const likeRoutes = new Elysia({prefix: "/relations"});
 

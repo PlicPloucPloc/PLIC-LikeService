@@ -7,3 +7,5 @@ class relation {
         this.aptId = aptId;
     }
 }
+
+export { relation };

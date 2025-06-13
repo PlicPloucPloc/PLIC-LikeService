@@ -1,4 +1,5 @@
 async function fetchApartment(bearer : String, id: number) : Promise<string> {
+    console.log("Sending req")
     const userUrl = (process.env.APT_URL || "http://localhost:3000") + "/apt/" + id
     const request = new Request(userUrl, {
         method: "get",

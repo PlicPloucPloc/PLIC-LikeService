@@ -37,7 +37,7 @@ async function getRelation(userId:string, aptId:number){
 }
 
 async function getRelations(userId:string){
-    console.log("Fetching data")
+    console.log("Fetching data for user: " + userId);
     try {
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r, a"
