@@ -22,7 +22,6 @@ COPY --from=builder /app/node_modules node_modules
 
 COPY src src
 COPY tsconfig.json .
-# COPY public public
 
 CMD ["./bun", "src/index.ts"]
 
