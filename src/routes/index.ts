@@ -10,7 +10,7 @@ likeRoutes.use(bearer()).get('/all', async ({ bearer }) => {
         return await getAllRelations(bearer);
     } catch (error) {
         if (error instanceof HttpError) {
-            return error;
+            return new Response(`{\"message\": ${error.message}}`, { status: error.statusCode, headers: { "Content-Type": "application/json" } });
         }
         throw error;
     }
@@ -20,8 +20,7 @@ likeRoutes.use(bearer()).get('/all', async ({ bearer }) => {
             set.headers[
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
-
-            return HttpError.Unauthorized("Bearer not found or invalid");
+            return new Response(`{\"message\": \"Bearer not found or invalid"}`, { status: 401, headers: { "Content-Type": "application/json" } });
         }
     }
 })
@@ -31,7 +30,7 @@ likeRoutes.use(bearer()).get('/likes/:isFilterColoc', async ({ bearer }) => {
         return await getAllLikes(bearer);
     } catch (error) {
         if (error instanceof HttpError) {
-            return error;
+            return new Response(`{\"message\": ${error.message}}`, { status: error.statusCode, headers: { "Content-Type": "application/json" } });
         }
         throw error;
     }
@@ -42,7 +41,7 @@ likeRoutes.use(bearer()).get('/likes/:isFilterColoc', async ({ bearer }) => {
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
 
-            return HttpError.Unauthorized("Bearer not found or invalid");
+            return new Response(`{\"message\": \"Bearer not found or invalid"}`, { status: 401, headers: { "Content-Type": "application/json" } });
        } 
     }
 })
@@ -52,7 +51,7 @@ likeRoutes.use(bearer()).get('/dislikes', async ({ bearer }) => {
         return await getAllDislikes(bearer);
     } catch (error) {
         if (error instanceof HttpError) {
-            return error;
+            return new Response(`{\"message\": ${error.message}}`, { status: error.statusCode, headers: { "Content-Type": "application/json" } });
         }
         throw error;
     }
@@ -63,7 +62,7 @@ likeRoutes.use(bearer()).get('/dislikes', async ({ bearer }) => {
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
 
-            return HttpError.Unauthorized("Bearer not found or invalid");
+            return new Response(`{\"message\": \"Bearer not found or invalid"}`, { status: 401, headers: { "Content-Type": "application/json" } });
         }
     }
 })
@@ -74,7 +73,7 @@ likeRoutes.use(bearer()).post('/', async ({ bearer, body }) => {
         return new Response("{\"status\": \"OK\"}", {status: 201, headers: { "Content-Type": "application/json"}});
     } catch(error) {
         if (error instanceof HttpError) {
-            return error;
+            return new Response(`{\"message\": ${error.message}}`, { status: error.statusCode, headers: { "Content-Type": "application/json" } });
         }
         throw error;
     }
@@ -89,7 +88,7 @@ likeRoutes.use(bearer()).post('/', async ({ bearer, body }) => {
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
 
-            return HttpError.Unauthorized("Bearer not found or invalid");
+            return new Response(`{\"message\": \"Bearer not found or invalid"}`, { status: 401, headers: { "Content-Type": "application/json" } });
         }
     }
 })
@@ -100,7 +99,7 @@ likeRoutes.use(bearer()).put('/', async ({ bearer, body }) => {
         return new Response("{\"status\": \"OK\"}", {status: 200, headers: { "Content-Type": "application/json"}});
     } catch (error) {
         if (error instanceof HttpError) {
-            return error;
+            return new Response(`{\"message\": ${error.message}}`, { status: error.statusCode, headers: { "Content-Type": "application/json" } });
         }
         throw error;
     }
@@ -115,7 +114,7 @@ likeRoutes.use(bearer()).put('/', async ({ bearer, body }) => {
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
             
-            return HttpError.Unauthorized("Bearer not found or invalid");
+            return new Response(`{\"message\": \"Bearer not found or invalid"}`, { status: 401, headers: { "Content-Type": "application/json" } });
         }
     }
 })
@@ -126,7 +125,7 @@ likeRoutes.use(bearer()).delete('/', ({ bearer, body }) => {
         return new Response("{\"status\": \"OK\"}", {status: 204, headers: { "Content-Type": "application/json"}});
     } catch(error) {
         if (error instanceof HttpError) {
-            return error;
+            return new Response(`{\"message\": ${error.message}}`, { status: error.statusCode, headers: { "Content-Type": "application/json" } });
         }
         throw error;
     }
@@ -141,7 +140,7 @@ likeRoutes.use(bearer()).delete('/', ({ bearer, body }) => {
                 'WWW-Authenticate'
             ] = `Bearer realm='sign', error="invalid_request"`
 
-            return HttpError.Unauthorized("Bearer not found or invalid");
+            return new Response(`{\"message\": \"Bearer not found or invalid"}`, { status: 401, headers: { "Content-Type": "application/json" } });
         }
     }
 })

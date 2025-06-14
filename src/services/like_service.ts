@@ -96,6 +96,7 @@ async function getAllLikes(bearer : string) : Promise<relation[]>{
 
 async function getAllDislikes(bearer : string) : Promise<relation[]>{
     const userId = await getUser(bearer) 
+    console.log("UserId: ", userId)
     if(!userId) {
         throw HttpError.Unauthorized("User do not exist");
     }
