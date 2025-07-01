@@ -7,4 +7,4 @@ To run the service locally, you need to use the [PLIC-LocalDevelopment](https://
 
 Every endpoints need the `Authorization` header with a valid JWT token.
 
->To acces the swagger got to [localhost:3002/swagger](http://localhost:3002/swagger) if you run the service locally.
+> To acces the swagger got to [localhost:3002/swagger](http://localhost:3002/swagger) if you run the service locally.

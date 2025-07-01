@@ -1,13 +1,13 @@
-async function fetchApartment(bearer : String, id: number) : Promise<string> {
-    console.log("Sending req")
-    const userUrl = (process.env.APT_URL || "http://localhost:3000") + "/" + id
+async function fetchApartment(bearer: String, id: number): Promise<string> {
+    console.log('Sending req');
+    const userUrl = (process.env.APT_URL || 'http://localhost:3000') + '/' + id;
     const request = new Request(userUrl, {
-        method: "get",
+        method: 'get',
         headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + bearer 
-        }
-    })
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + bearer,
+        },
+    });
     const aptID = (await (await fetch(request)).json()).apartment_id;
     return aptID;
 }

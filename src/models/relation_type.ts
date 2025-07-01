@@ -1,6 +1,6 @@
-enum relation_type{
+enum relation_type {
     LIKE,
-    DISLIKE
+    DISLIKE,
 }
 
-export {relation_type};
+export { relation_type };

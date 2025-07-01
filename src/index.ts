@@ -1,10 +1,10 @@
-import { Elysia } from "elysia";
-import { likeRoutes } from "./routes";
-import swagger from "@elysiajs/swagger";
+import { Elysia } from 'elysia';
+import { likeRoutes } from './routes';
+import swagger from '@elysiajs/swagger';
 
 const app = new Elysia();
 
-app.group("", (app) => app.use(likeRoutes))
+app.group('', (app) => app.use(likeRoutes))
     .use(swagger())
     .listen(process.env.PORT || 3000);
 
