@@ -3,7 +3,7 @@ import { bearer } from "@elysiajs/bearer";
 import { addRelation, deleteRelation, updateRelation, getAllRelations, getAllLikes, getAllDislikes } from "../services/like_service";
 import { HttpError } from "elysia-http-error";
 
-const likeRoutes = new Elysia({prefix: "/relations"});
+const likeRoutes = new Elysia();
 
 likeRoutes.use(bearer()).get('/all', async ({ bearer }) => {
     try {

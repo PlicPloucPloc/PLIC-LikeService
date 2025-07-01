@@ -19,7 +19,7 @@ async function getApartment(aptId:number){
         )
         return records;
     } catch(err : any) {
-        console.error("Failed to get appartment: ", err.cause)
+        console.error("Failed to get apartment: ", err.cause)
         throw err;
     }
 }
@@ -31,7 +31,7 @@ async function getRelation(userId:string, aptId:number){
         )
         return records;
     } catch(err : any) {
-        console.error("Failed to get appartment: ", err.cause)
+        console.error("Failed to get apartment: ", err.cause)
         throw err;
     }
 }
@@ -56,7 +56,7 @@ async function getLikes(userId:string){
         )
         return records;
     } catch(err : any) {
-        console.error("Failed to get appartment: ", err.cause)
+        console.error("Failed to get apartment: ", err.cause)
         throw err;
     }
 }
@@ -68,7 +68,7 @@ async function getDislikes(userId:string){
         )
         return records;
     } catch(err : any) {
-        console.error("Failed to get appartment: ", err.cause)
+        console.error("Failed to get apartment: ", err.cause)
         throw err;
     }
 }
@@ -90,7 +90,7 @@ async function addAppartment(aptId : number) : Promise<void>{
             "Create (:Appartment {id:\'" + aptId + "\'})"
         )
     } catch(err : any) {
-        console.error("Failed to add appartment: ", err.cause)
+        console.error("Failed to add apartment: ", err.cause)
         throw err;
     }
 }
@@ -139,7 +139,7 @@ async function removeAppartment(aptId:number){
         console.log("Result: " + records)
         return records;
     } catch(err : any) {
-        console.error("Failed to remove appartment: ", err.cause)
+        console.error("Failed to remove apartment: ", err.cause)
         throw err;
     }
 }

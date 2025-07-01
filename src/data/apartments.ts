@@ -1,6 +1,6 @@
 async function fetchApartment(bearer : String, id: number) : Promise<string> {
     console.log("Sending req")
-    const userUrl = (process.env.APT_URL || "http://localhost:3000") + "/apt/" + id
+    const userUrl = (process.env.APT_URL || "http://localhost:3000") + "/" + id
     const request = new Request(userUrl, {
         method: "get",
         headers: {
@@ -8,7 +8,7 @@ async function fetchApartment(bearer : String, id: number) : Promise<string> {
             Authorization: "Bearer " + bearer 
         }
     })
-    const aptID = (await (await fetch(request)).json()).appartment_id;
+    const aptID = (await (await fetch(request)).json()).apartment_id;
     return aptID;
 }
 
