@@ -1,4 +1,4 @@
-import apartment_info from "../models/apartment_info";
+import apartment_info from '../models/apartment_info';
 
 async function fetchApartment(bearer: String, id: number): Promise<string> {
     console.log('Sending req');

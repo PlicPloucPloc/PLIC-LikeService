@@ -1,4 +1,4 @@
-import apartment_info from "./apartment_info";
+import apartment_info from './apartment_info';
 
 class relation {
     type: string;

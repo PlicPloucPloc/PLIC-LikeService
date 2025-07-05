@@ -44,8 +44,13 @@ async function getRelations(userId: string, skip: number, limit: number) {
     console.log(`Fetching relations for user: ${userId} with skip: ${skip} and limit: ${limit}`);
     try {
         const { records } = await driver.executeQuery(
-            "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r, a" +
-            " SKIP " + skip + " LIMIT " + limit,
+            "MATCH (p:Person {id:\'" +
+                userId +
+                "\'})-[r]->(a:Appartment) RETURN r, a" +
+                ' SKIP ' +
+                skip +
+                ' LIMIT ' +
+                limit,
         );
         return records;
     } catch (err: any) {
@@ -56,10 +61,15 @@ async function getRelations(userId: string, skip: number, limit: number) {
 
 async function getLikes(userId: string, skip: number, limit: number) {
     try {
-        console.log("Fetching dislikes for user: " + userId);
+        console.log('Fetching dislikes for user: ' + userId);
         const { records } = await driver.executeQuery(
-            "MATCH (p:Person {id:\'" + userId + "\'})-[r:LIKE]->(a:Appartment) RETURN a" + 
-            " SKIP " + skip + " LIMIT " + limit,
+            "MATCH (p:Person {id:\'" +
+                userId +
+                "\'})-[r:LIKE]->(a:Appartment) RETURN a" +
+                ' SKIP ' +
+                skip +
+                ' LIMIT ' +
+                limit,
         );
         return records;
     } catch (err: any) {
@@ -71,8 +81,13 @@ async function getLikes(userId: string, skip: number, limit: number) {
 async function getDislikes(userId: string, skip: number, limit: number) {
     try {
         const { records } = await driver.executeQuery(
-            "MATCH (p:Person {id:\'" + userId + "\'})-[r:DISLIKE]->(a:Appartment) RETURN a" +
-            " SKIP " + skip + " LIMIT " + limit,
+            "MATCH (p:Person {id:\'" +
+                userId +
+                "\'})-[r:DISLIKE]->(a:Appartment) RETURN a" +
+                ' SKIP ' +
+                skip +
+                ' LIMIT ' +
+                limit,
         );
         return records;
     } catch (err: any) {

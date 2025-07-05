@@ -83,10 +83,15 @@ async function getAllRelations(bearer: string, skip: number, limit: number): Pro
     }
     console.log('In service');
     const relations = await getRelations(userId, skip, limit);
-    return Promise.all(relations.map(async (rel) => {
-        console.log('r: ', rel.get('r').type);
-        return new relation(rel.get('r').type, await getApartmentInfo(bearer, rel.get('a').properties.id));
-    }));
+    return Promise.all(
+        relations.map(async (rel) => {
+            console.log('r: ', rel.get('r').type);
+            return new relation(
+                rel.get('r').type,
+                await getApartmentInfo(bearer, rel.get('a').properties.id),
+            );
+        }),
+    );
 }
 
 async function getAllLikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
@@ -95,8 +100,15 @@ async function getAllLikes(bearer: string, skip: number, limit: number): Promise
         throw HttpError.Unauthorized('User do not exist');
     }
     const relations = await getLikes(userId, skip, limit);
-    return Promise.all(relations.map(async (rel) => new relation(relation_type[relation_type.LIKE], 
-                                               await getApartmentInfo(bearer, rel.get('a').properties.id))));
+    return Promise.all(
+        relations.map(
+            async (rel) =>
+                new relation(
+                    relation_type[relation_type.LIKE],
+                    await getApartmentInfo(bearer, rel.get('a').properties.id),
+                ),
+        ),
+    );
 }
 
 async function getAllDislikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
@@ -106,8 +118,15 @@ async function getAllDislikes(bearer: string, skip: number, limit: number): Prom
         throw HttpError.Unauthorized('User do not exist');
     }
     const relations = await getDislikes(userId, skip, limit);
-    return Promise.all(relations.map(async (rel) => new relation(relation_type[relation_type.DISLIKE], 
-                                               await getApartmentInfo(bearer , rel.get('a').properties.id))));
+    return Promise.all(
+        relations.map(
+            async (rel) =>
+                new relation(
+                    relation_type[relation_type.DISLIKE],
+                    await getApartmentInfo(bearer, rel.get('a').properties.id),
+                ),
+        ),
+    );
 }
 
 async function getApartmentInfo(bearer: string, aptId: number): Promise<apartment_info> {
