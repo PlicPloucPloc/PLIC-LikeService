@@ -55,6 +55,7 @@ async function getRelations(userId: string) {
 
 async function getLikes(userId: string) {
     try {
+        console.log("Fetching dislikes for user: " + userId);
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" + userId + "\'})-[r:LIKE]->(a:Appartment) RETURN a",
         );
