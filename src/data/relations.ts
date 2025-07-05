@@ -40,8 +40,8 @@ async function getRelation(userId: string, aptId: number) {
     }
 }
 
-async function getRelations(userId: string, skip: number = 0, limit: number = 10) {
-    console.log('Fetching data for user: ' + userId);
+async function getRelations(userId: string, skip: number, limit: number) {
+    console.log(`Fetching relations for user: ${userId} with skip: ${skip} and limit: ${limit}`);
     try {
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r, a" +
@@ -54,7 +54,7 @@ async function getRelations(userId: string, skip: number = 0, limit: number = 10
     }
 }
 
-async function getLikes(userId: string, skip: number = 0, limit: number = 10) {
+async function getLikes(userId: string, skip: number, limit: number) {
     try {
         console.log("Fetching dislikes for user: " + userId);
         const { records } = await driver.executeQuery(
@@ -68,7 +68,7 @@ async function getLikes(userId: string, skip: number = 0, limit: number = 10) {
     }
 }
 
-async function getDislikes(userId: string, skip: number = 0, limit: number = 10) {
+async function getDislikes(userId: string, skip: number, limit: number) {
     try {
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" + userId + "\'})-[r:DISLIKE]->(a:Appartment) RETURN a" +

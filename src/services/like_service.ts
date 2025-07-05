@@ -106,7 +106,7 @@ async function getAllDislikes(bearer: string, skip: number, limit: number): Prom
         throw HttpError.Unauthorized('User do not exist');
     }
     const relations = await getDislikes(userId, skip, limit);
-    return Promise.all(relations.map(async (rel) => new relation(relation_type[relation_type.LIKE], 
+    return Promise.all(relations.map(async (rel) => new relation(relation_type[relation_type.DISLIKE], 
                                                await getApartmentInfo(bearer , rel.get('a').properties.id))));
 }
 

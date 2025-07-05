@@ -14,9 +14,11 @@ const likeRoutes = new Elysia();
 
 likeRoutes.use(bearer()).get(
     '/all',
-    async ({ bearer,body }) => {
+    async ({ bearer, query }) => {
         try {
-            return await getAllRelations(bearer, body.skip, body.limit);
+            const skip = query.skip ? parseInt(query.skip) : 0;
+            const limit = query.limit ? parseInt(query.limit) : 10;
+            return await getAllRelations(bearer, skip, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{\"message\": ${error.message}}`, {
@@ -28,10 +30,6 @@ likeRoutes.use(bearer()).get(
         }
     },
     {
-        body: t.Object({
-            skip: t.Number(),
-            limit: t.Number(),
-        }),
         beforeHandle({ bearer, set }) {
             if (!bearer) {
                 set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
@@ -46,9 +44,11 @@ likeRoutes.use(bearer()).get(
 
 likeRoutes.use(bearer()).get(
     '/likes/:isFilterColoc',
-    async ({ bearer, body }) => {
+    async ({ bearer, query }) => {
         try {
-            return await getAllLikes(bearer, body.skip, body.limit);
+            const skip = query.skip ? parseInt(query.skip) : 0;
+            const limit = query.limit ? parseInt(query.limit) : 10;
+            return await getAllLikes(bearer, skip, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{\"message\": ${error.message}}`, {
@@ -60,10 +60,6 @@ likeRoutes.use(bearer()).get(
         }
     },
     {
-        body: t.Object({
-            skip: t.Number(),
-            limit: t.Number(),
-        }),
         beforeHandle({ bearer, set }) {
             if (!bearer) {
                 set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
@@ -79,9 +75,11 @@ likeRoutes.use(bearer()).get(
 
 likeRoutes.use(bearer()).get(
     '/dislikes',
-    async ({ bearer, body }) => {
+    async ({ bearer, query }) => {
         try {
-            return await getAllDislikes(bearer, body.skip, body.limit);
+            const skip = query.skip ? parseInt(query.skip) : 0;
+            const limit = query.limit ? parseInt(query.limit) : 10;
+            return await getAllDislikes(bearer, skip, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{\"message\": ${error.message}}`, {
@@ -93,10 +91,6 @@ likeRoutes.use(bearer()).get(
         }
     },
     {
-        body: t.Object({
-            skip: t.Number(),
-            limit: t.Number(),
-        }),
         beforeHandle({ bearer, set }) {
             if (!bearer) {
                 set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
