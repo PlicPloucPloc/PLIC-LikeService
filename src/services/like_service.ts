@@ -28,22 +28,22 @@ async function addRelation(bearer: string, aptId: number, isLike: boolean): Prom
         throw HttpError.NotFound('Apartment not found');
     }
     if (!((await getUserNode(userId)).length > 0)) {
-        addUser(userId);
+        await addUser(userId);
     }
 
     console.log('Adding relation: ' + userId + ' : ' + aptId + ' : ' + isLike);
     if ((await getApartment(aptId)).length == 0) {
         console.log('Creating Apt : ' + aptId);
-        addAppartment(aptId);
+        await addAppartment(aptId);
     }
     if ((await getRelation(userId, aptId)).length > 0) {
         throw HttpError.BadRequest('Relation already exists');
     }
 
     if (isLike) {
-        addLike(userId, aptId);
+        await addLike(userId, aptId);
     } else {
-        addDislike(userId, aptId);
+        await addDislike(userId, aptId);
     }
 }
 
