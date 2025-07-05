@@ -13,9 +13,10 @@ import {
 } from '../data/relations';
 import { HttpError } from 'elysia-http-error';
 import { getUser } from '../data/users';
-import { fetchApartment } from '../data/apartments';
+import { fetchApartment, fetchApartmentInfo } from '../data/apartments';
 import { relation } from '../models/relation';
 import { relation_type } from '../models/relation_type';
+import apartment_info from '../models/apartment_info';
 
 async function addRelation(bearer: string, aptId: number, isLike: boolean): Promise<void> {
     const userId = await getUser(bearer);
@@ -82,10 +83,10 @@ async function getAllRelations(bearer: string, skip: number, limit: number): Pro
     }
     console.log('In service');
     const relations = await getRelations(userId, skip, limit);
-    return relations.map((rel) => {
+    return Promise.all(relations.map(async (rel) => {
         console.log('r: ', rel.get('r').type);
-        return new relation(rel.get('r').type, rel.get('a').properties.id);
-    });
+        return new relation(rel.get('r').type, await getApartmentInfo(bearer, rel.get('a').properties.id));
+    }));
 }
 
 async function getAllLikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
@@ -94,7 +95,8 @@ async function getAllLikes(bearer: string, skip: number, limit: number): Promise
         throw HttpError.Unauthorized('User do not exist');
     }
     const relations = await getLikes(userId, skip, limit);
-    return relations.map((rel) => new relation(relation_type[relation_type.LIKE], rel.get('a').properties.id));
+    return Promise.all(relations.map(async (rel) => new relation(relation_type[relation_type.LIKE], 
+                                               await getApartmentInfo(bearer, rel.get('a').properties.id))));
 }
 
 async function getAllDislikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
@@ -104,7 +106,17 @@ async function getAllDislikes(bearer: string, skip: number, limit: number): Prom
         throw HttpError.Unauthorized('User do not exist');
     }
     const relations = await getDislikes(userId, skip, limit);
-    return relations.map((rel) => new relation(relation_type[relation_type.LIKE], rel.get('a').properties.id));
+    return Promise.all(relations.map(async (rel) => new relation(relation_type[relation_type.LIKE], 
+                                               await getApartmentInfo(bearer , rel.get('a').properties.id))));
+}
+
+async function getApartmentInfo(bearer: string, aptId: number): Promise<apartment_info> {
+    const userId = await getUser(bearer);
+    if (!userId) {
+        throw HttpError.Unauthorized('User do not exist');
+    }
+    const aptInfo = await fetchApartmentInfo(bearer, aptId);
+    return aptInfo;
 }
 
 export {

@@ -1,10 +1,12 @@
-class relation {
-    type: relation_type;
-    aptId: string;
+import apartment_info from "./apartment_info";
 
-    constructor(type: relation_type, aptId: string) {
+class relation {
+    type: string;
+    apt: apartment_info;
+
+    constructor(type: string, apt: apartment_info) {
         this.type = type;
-        this.aptId = aptId;
+        this.apt = apt;
     }
 }
 
