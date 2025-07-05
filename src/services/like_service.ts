@@ -82,6 +82,10 @@ async function getAllRelations(bearer: string): Promise<relation[]> {
     }
     console.log('In service');
     const relations = await getRelations(userId);
+    if (relations.length == 0) {
+        console.error('Relations not found');
+        throw HttpError.NotFound('Relations not found');
+    }
     return relations.map((rel) => {
         console.log('r: ', rel.get('r').type);
         return new relation(rel.get('r').type, rel.get('a').properties.id);
@@ -95,15 +99,10 @@ async function getAllLikes(bearer: string): Promise<relation[]> {
     }
     const relations = await getLikes(userId);
     if (relations.length <= 0) {
-<<<<<<< Updated upstream
-        console.error('User not found');
-        throw HttpError.NotFound('User not found');
-=======
         console.error("Relations not found");
         throw HttpError.NotFound("Relations not found");
->>>>>>> Stashed changes
     }
-    return relations.map((rel) => new relation(relation_type.LIKE, rel.get('a').properties.id));
+    return relations.map((rel) => new relation(relation_type[relation_type.LIKE], rel.get('a').properties.id));
 }
 
 async function getAllDislikes(bearer: string): Promise<relation[]> {
@@ -114,15 +113,10 @@ async function getAllDislikes(bearer: string): Promise<relation[]> {
     }
     const relations = await getDislikes(userId);
     if (relations.length <= 0) {
-<<<<<<< Updated upstream
-        console.error('User not found');
-        throw HttpError.NotFound('User not found');
-=======
-        console.error("Relations not found");
-        throw HttpError.NotFound("Relations not found");
->>>>>>> Stashed changes
+        console.error('Relations not found');
+        throw HttpError.NotFound('Relations not found');
     }
-    return relations.map((rel) => new relation(relation_type.DISLIKE, rel.get('a').properties.id));
+    return relations.map((rel) => new relation(relation_type[relation_type.LIKE], rel.get('a').properties.id));
 }
 
 export {
