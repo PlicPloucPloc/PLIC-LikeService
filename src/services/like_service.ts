@@ -37,7 +37,7 @@ async function addRelation(bearer: string, aptId: number, isLike: boolean): Prom
         addAppartment(aptId);
     }
     if ((await getRelation(userId, aptId)).length > 0) {
-        throw HttpError.BadRequest('Relation already exist');
+        throw HttpError.BadRequest('Relation already exists');
     }
 
     if (isLike) {
