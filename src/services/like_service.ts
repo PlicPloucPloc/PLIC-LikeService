@@ -75,35 +75,35 @@ async function updateRelation(bearer: string, aptId: number, isLike: boolean): P
     }
 }
 
-async function getAllRelations(bearer: string): Promise<relation[]> {
+async function getAllRelations(bearer: string, skip: number, limit: number): Promise<relation[]> {
     const userId = await getUser(bearer);
     if (!userId) {
         throw HttpError.Unauthorized('User do not exist');
     }
     console.log('In service');
-    const relations = await getRelations(userId);
+    const relations = await getRelations(userId, skip, limit);
     return relations.map((rel) => {
         console.log('r: ', rel.get('r').type);
         return new relation(rel.get('r').type, rel.get('a').properties.id);
     });
 }
 
-async function getAllLikes(bearer: string): Promise<relation[]> {
+async function getAllLikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
     const userId = await getUser(bearer);
     if (!userId) {
         throw HttpError.Unauthorized('User do not exist');
     }
-    const relations = await getLikes(userId);
+    const relations = await getLikes(userId, skip, limit);
     return relations.map((rel) => new relation(relation_type[relation_type.LIKE], rel.get('a').properties.id));
 }
 
-async function getAllDislikes(bearer: string): Promise<relation[]> {
+async function getAllDislikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
     const userId = await getUser(bearer);
     console.log('UserId: ', userId);
     if (!userId) {
         throw HttpError.Unauthorized('User do not exist');
     }
-    const relations = await getDislikes(userId);
+    const relations = await getDislikes(userId, skip, limit);
     return relations.map((rel) => new relation(relation_type[relation_type.LIKE], rel.get('a').properties.id));
 }
 

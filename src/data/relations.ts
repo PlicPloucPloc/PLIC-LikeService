@@ -40,11 +40,12 @@ async function getRelation(userId: string, aptId: number) {
     }
 }
 
-async function getRelations(userId: string) {
+async function getRelations(userId: string, skip: number = 0, limit: number = 10) {
     console.log('Fetching data for user: ' + userId);
     try {
         const { records } = await driver.executeQuery(
-            "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r, a",
+            "MATCH (p:Person {id:\'" + userId + "\'})-[r]->(a:Appartment) RETURN r, a" +
+            " SKIP " + skip + " LIMIT " + limit,
         );
         return records;
     } catch (err: any) {
@@ -53,11 +54,12 @@ async function getRelations(userId: string) {
     }
 }
 
-async function getLikes(userId: string) {
+async function getLikes(userId: string, skip: number = 0, limit: number = 10) {
     try {
         console.log("Fetching dislikes for user: " + userId);
         const { records } = await driver.executeQuery(
-            "MATCH (p:Person {id:\'" + userId + "\'})-[r:LIKE]->(a:Appartment) RETURN a",
+            "MATCH (p:Person {id:\'" + userId + "\'})-[r:LIKE]->(a:Appartment) RETURN a" + 
+            " SKIP " + skip + " LIMIT " + limit,
         );
         return records;
     } catch (err: any) {
@@ -66,10 +68,11 @@ async function getLikes(userId: string) {
     }
 }
 
-async function getDislikes(userId: string) {
+async function getDislikes(userId: string, skip: number = 0, limit: number = 10) {
     try {
         const { records } = await driver.executeQuery(
-            "MATCH (p:Person {id:\'" + userId + "\'})-[r:DISLIKE]->(a:Appartment) RETURN a",
+            "MATCH (p:Person {id:\'" + userId + "\'})-[r:DISLIKE]->(a:Appartment) RETURN a" +
+            " SKIP " + skip + " LIMIT " + limit,
         );
         return records;
     } catch (err: any) {

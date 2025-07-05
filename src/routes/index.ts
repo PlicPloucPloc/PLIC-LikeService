@@ -14,9 +14,9 @@ const likeRoutes = new Elysia();
 
 likeRoutes.use(bearer()).get(
     '/all',
-    async ({ bearer }) => {
+    async ({ bearer,body }) => {
         try {
-            return await getAllRelations(bearer);
+            return await getAllRelations(bearer, body.skip, body.limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{\"message\": ${error.message}}`, {
@@ -28,6 +28,10 @@ likeRoutes.use(bearer()).get(
         }
     },
     {
+        body: t.Object({
+            skip: t.Number(),
+            limit: t.Number(),
+        }),
         beforeHandle({ bearer, set }) {
             if (!bearer) {
                 set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
@@ -42,9 +46,9 @@ likeRoutes.use(bearer()).get(
 
 likeRoutes.use(bearer()).get(
     '/likes/:isFilterColoc',
-    async ({ bearer }) => {
+    async ({ bearer, body }) => {
         try {
-            return await getAllLikes(bearer);
+            return await getAllLikes(bearer, body.skip, body.limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{\"message\": ${error.message}}`, {
@@ -56,6 +60,10 @@ likeRoutes.use(bearer()).get(
         }
     },
     {
+        body: t.Object({
+            skip: t.Number(),
+            limit: t.Number(),
+        }),
         beforeHandle({ bearer, set }) {
             if (!bearer) {
                 set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
@@ -71,9 +79,9 @@ likeRoutes.use(bearer()).get(
 
 likeRoutes.use(bearer()).get(
     '/dislikes',
-    async ({ bearer }) => {
+    async ({ bearer, body }) => {
         try {
-            return await getAllDislikes(bearer);
+            return await getAllDislikes(bearer, body.skip, body.limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{\"message\": ${error.message}}`, {
@@ -85,6 +93,10 @@ likeRoutes.use(bearer()).get(
         }
     },
     {
+        body: t.Object({
+            skip: t.Number(),
+            limit: t.Number(),
+        }),
         beforeHandle({ bearer, set }) {
             if (!bearer) {
                 set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
