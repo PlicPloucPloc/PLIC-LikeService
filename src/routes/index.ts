@@ -180,9 +180,9 @@ likeRoutes.use(bearer()).put(
 
 likeRoutes.use(bearer()).delete(
     '/',
-    ({ bearer, body }) => {
+    async ({ bearer, body }) => {
         try {
-            deleteRelation(bearer, body.aptId);
+            await deleteRelation(bearer, body.aptId);
             return new Response('{"status": "OK"}', {
                 status: 204,
                 headers: { 'Content-Type': 'application/json' },
@@ -200,7 +200,6 @@ likeRoutes.use(bearer()).delete(
     {
         body: t.Object({
             aptId: t.Number(),
-            isLike: t.Boolean(),
         }),
         beforeHandle({ bearer, set }) {
             if (!bearer) {
