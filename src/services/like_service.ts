@@ -95,13 +95,17 @@ async function getAllRelations(bearer: string, skip: number, limit: number): Pro
     );
 }
 
-async function getApartmentsNoRelations(bearer: string, skip: number, limit: number): Promise<{aptIds: number[]}> {
+async function getApartmentsNoRelations(
+    bearer: string,
+    skip: number,
+    limit: number,
+): Promise<{ aptIds: number[] }> {
     const userId = await getUser(bearer);
     if (!userId) {
         throw HttpError.Unauthorized('User do not exist');
     }
-    const apartments = await fetchApartmentNoRelations(userId, skip,limit);
-    return { aptIds : apartments.map(apt => apt.get('a').properties.id)};
+    const apartments = await fetchApartmentNoRelations(userId, skip, limit);
+    return { aptIds: apartments.map((apt) => apt.get('a').properties.id) };
 }
 
 async function getAllLikes(bearer: string, skip: number, limit: number): Promise<relation[]> {

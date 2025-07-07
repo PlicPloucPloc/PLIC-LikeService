@@ -181,16 +181,12 @@ likeRoutes.use(bearer()).put(
     },
 );
 
-
 likeRoutes.use(bearer()).delete(
     '/',
     async ({ bearer, body }) => {
         try {
             await deleteRelation(bearer, body.aptId);
-            return new Response('{"status": "OK"}', {
-                status: 204,
-                headers: { 'Content-Type': 'application/json' },
-            });
+            return new Response(null, { status: 204 });
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{"message": "${error.message}"}`, {
@@ -247,13 +243,13 @@ likeRoutes.use(bearer()).get(
             }
         },
     },
-)
+);
 
 likeRoutes.use(bearer()).post(
     '/aptNode',
     async ({ bearer, body }) => {
         try {
-            await createAppartmentNode(bearer,body.aptId);
+            await createAppartmentNode(bearer, body.aptId);
             return new Response('{"status": "OK"}', {
                 status: 201,
                 headers: { 'Content-Type': 'application/json' },
