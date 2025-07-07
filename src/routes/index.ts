@@ -7,6 +7,9 @@ import {
     getAllRelations,
     getAllLikes,
     getAllDislikes,
+    createUserNode,
+    createAppartmentNode,
+    getApartmentsNoRelations,
 } from '../services/like_service';
 import { HttpError } from 'elysia-http-error';
 
@@ -201,6 +204,106 @@ likeRoutes.use(bearer()).delete(
         body: t.Object({
             aptId: t.Number(),
         }),
+        beforeHandle({ bearer, set }) {
+            if (!bearer) {
+                set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
+
+                return new Response(`{"message": "Bearer not found or invalid"}`, {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        },
+    },
+);
+
+likeRoutes.use(bearer()).get(
+    '/noRelations',
+    async ({ bearer, query }) => {
+        try {
+            const skip = query.skip ? parseInt(query.skip) : 0;
+            const limit = query.limit ? parseInt(query.limit) : 10;
+            return await getApartmentsNoRelations(bearer, skip, limit);
+        } catch (error) {
+            if (error instanceof HttpError) {
+                return new Response(`{"message": "${error.message}"}`, {
+                    status: error.statusCode,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            throw error;
+        }
+    },
+    {
+        beforeHandle({ bearer, set }) {
+            if (!bearer) {
+                set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
+
+                return new Response(`{"message": "Bearer not found or invalid"}`, {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        },
+    },
+)
+
+likeRoutes.use(bearer()).post(
+    '/aptNode',
+    async ({ bearer, body }) => {
+        try {
+            await createAppartmentNode(bearer,body.aptId);
+            return new Response('{"status": "OK"}', {
+                status: 201,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        } catch (error) {
+            if (error instanceof HttpError) {
+                return new Response(`{"message": "${error.message}"}`, {
+                    status: error.statusCode,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            throw error;
+        }
+    },
+    {
+        body: t.Object({
+            aptId: t.Number(),
+        }),
+        beforeHandle({ bearer, set }) {
+            if (!bearer) {
+                set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
+
+                return new Response(`{"message": "Bearer not found or invalid"}`, {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        },
+    },
+);
+
+likeRoutes.use(bearer()).post(
+    '/userNode',
+    async ({ bearer }) => {
+        try {
+            createUserNode(bearer);
+            return new Response('{"status": "OK"}', {
+                status: 201,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        } catch (error) {
+            if (error instanceof HttpError) {
+                return new Response(`{"message": "${error.message}"}`, {
+                    status: error.statusCode,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            throw error;
+        }
+    },
+    {
         beforeHandle({ bearer, set }) {
             if (!bearer) {
                 set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;

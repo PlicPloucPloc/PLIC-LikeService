@@ -10,6 +10,7 @@ import {
     getLikes,
     getUserNode,
     getDislikes,
+    fetchApartmentNoRelations,
 } from '../data/relations';
 import { HttpError } from 'elysia-http-error';
 import { getUser } from '../data/users';
@@ -94,6 +95,15 @@ async function getAllRelations(bearer: string, skip: number, limit: number): Pro
     );
 }
 
+async function getApartmentsNoRelations(bearer: string, skip: number, limit: number): Promise<{aptIds: number[]}> {
+    const userId = await getUser(bearer);
+    if (!userId) {
+        throw HttpError.Unauthorized('User do not exist');
+    }
+    const apartments = await fetchApartmentNoRelations(userId, skip,limit);
+    return { aptIds : apartments.map(apt => apt.get('a').properties.id)};
+}
+
 async function getAllLikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
     const userId = await getUser(bearer);
     if (!userId) {
@@ -138,6 +148,27 @@ async function getApartmentInfo(bearer: string, aptId: number): Promise<apartmen
     return aptInfo;
 }
 
+async function createAppartmentNode(bearer: string, aptId: number): Promise<void> {
+    const userId = await getUser(bearer);
+    if (!userId) {
+        throw HttpError.Unauthorized('User do not exist');
+    }
+    if ((await getApartment(aptId)).length == 0) {
+        console.log('Creating Apt : ' + aptId);
+        addAppartment(aptId);
+    }
+}
+
+async function createUserNode(bearer: string): Promise<void> {
+    const userId = await getUser(bearer);
+    if (!userId) {
+        throw HttpError.Unauthorized('User do not exist');
+    }
+    if ((await getUserNode(userId)).length == 0) {
+        addUser(userId);
+    }
+}
+
 export {
     addRelation,
     deleteRelation,
@@ -145,4 +176,7 @@ export {
     getAllRelations,
     getAllLikes,
     getAllDislikes,
+    createAppartmentNode,
+    createUserNode,
+    getApartmentsNoRelations,
 };

@@ -186,6 +186,23 @@ async function removeRelation(userId: string, aptId: number): Promise<void> {
     }
 }
 
+async function fetchApartmentNoRelations(userId: string, skip: number, limit: number) : Promise<any[]>{
+    try {
+        const { records } = await driver.executeQuery(
+            'MATCH (p:Person {id:"'+userId+'"})-[]->(a:Appartment) ' + 
+            'WITH p, collect(a) AS aptWithRelation ' +
+            'MATCH (a:Appartment) ' +
+            'WHERE NOT a IN aptWithRelation RETURN a '+
+            'SKIP ' + skip +
+            ' LIMIT ' + limit,
+        );
+        return records;
+    } catch (err: any) {
+        console.error('Failed to get apartments: ', err.cause);
+        throw err;
+    }
+}
+
 export {
     getUserNode,
     getApartment,
@@ -200,4 +217,5 @@ export {
     getRelations,
     getLikes,
     getDislikes,
+    fetchApartmentNoRelations
 };
