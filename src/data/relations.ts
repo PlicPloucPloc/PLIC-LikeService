@@ -80,6 +80,7 @@ async function getLikes(userId: string, skip: number, limit: number) {
 
 async function getDislikes(userId: string, skip: number, limit: number) {
     try {
+        console.log("Fetching dislikes for user: " + userId);
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" +
                 userId +
