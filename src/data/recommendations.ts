@@ -26,10 +26,10 @@ async function generateSimilarityGraph(): Promise<any[]> {
     }
 }
 
-async function getSimilarUsers(id: string): Promise<any[]> {
+async function getSimilarUsers(id: string) {
     try {
         const { records } = await driver.executeQuery(
-            "CALL gds.nodeSimilarity.stream('relationsGraph') YIELD node1, node2, similarity WHERE gds.util.asNode(node1).id = 1 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity ORDER BY similarity DESCENDING, Person1, Person2 LIMIT 10"
+            `CALL gds.nodeSimilarity.stream('relationsGraph') YIELD node1, node2, similarity WHERE gds.util.asNode(node1).id = ${id} RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity ORDER BY similarity DESCENDING, Person1, Person2 LIMIT 10`
         );
 
         return records;

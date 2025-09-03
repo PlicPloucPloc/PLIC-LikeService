@@ -1,4 +1,4 @@
-import { dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph } from "../data/recommendations";
+import { dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers } from "../data/recommendations";
 
 async function generateRecommendations(): Promise<void> {
     try {
@@ -11,4 +11,14 @@ async function generateRecommendations(): Promise<void> {
     }
 }
 
-export { generateRecommendations };
+async function fetchSimilarUsers(id: string): Promise<string[]> {
+    try {
+        const records = await getSimilarUsers(id);
+        return records.map(record => record.get('Person2'));
+    } catch (err: any) {
+        console.error('Failed to fetch similar users: ', err.cause);
+        throw err;
+    }
+}
+
+export { generateRecommendations, fetchSimilarUsers };
