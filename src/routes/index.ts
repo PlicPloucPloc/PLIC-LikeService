@@ -12,6 +12,7 @@ import {
     getApartmentsNoRelations,
 } from '../services/like_service';
 import { HttpError } from 'elysia-http-error';
+import { generateRecommendations } from '../services/recommendations_service';
 
 const likeRoutes = new Elysia();
 
@@ -313,5 +314,20 @@ likeRoutes.use(bearer()).post(
         },
     },
 );
+
+likeRoutes.post('generateRecommendatiosn', async () => {
+    try {
+        await generateRecommendations();
+    } catch (err : any) {
+        return new Response(`{"message": "Failed to generate recommendations: ${err.message}"}` , {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+    return new Response('{"status": "Recommendation generated"}', {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+    });
+});
 
 export { likeRoutes };
