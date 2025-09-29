@@ -8,10 +8,11 @@ import {
     getAllLikes,
     getAllDislikes,
     createUserNode,
-    createAppartmentNode,
-    getApartmentsNoRelations,
+    createApartmentNode,
 } from '../services/like_service';
 import { HttpError } from 'elysia-http-error';
+import { generateRecommendations, getRecommendedApartments } from '../services/recommendations_service';
+import { verifyUser } from '../services/user_verification_service';
 
 const likeRoutes = new Elysia();
 
@@ -21,7 +22,8 @@ likeRoutes.use(bearer()).get(
         try {
             const skip = query.skip ? parseInt(query.skip) : 0;
             const limit = query.limit ? parseInt(query.limit) : 10;
-            return await getAllRelations(bearer, skip, limit);
+            const userId = await verifyUser(bearer);
+            return await getAllRelations(userId, skip, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{"message": "${error.message}"}`, {
@@ -51,7 +53,8 @@ likeRoutes.use(bearer()).get(
         try {
             const skip = query.skip ? parseInt(query.skip) : 0;
             const limit = query.limit ? parseInt(query.limit) : 10;
-            return await getAllLikes(bearer, skip, limit);
+            const userId = await verifyUser(bearer);
+            return await getAllLikes(bearer, userId, skip, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{"message": "${error.message}"}`, {
@@ -82,7 +85,8 @@ likeRoutes.use(bearer()).get(
         try {
             const skip = query.skip ? parseInt(query.skip) : 0;
             const limit = query.limit ? parseInt(query.limit) : 10;
-            return await getAllDislikes(bearer, skip, limit);
+            const userId = await verifyUser(bearer);
+            return await getAllDislikes(bearer, userId, skip, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{"message": "${error.message}"}`, {
@@ -111,7 +115,11 @@ likeRoutes.use(bearer()).post(
     '/',
     async ({ bearer, body }) => {
         try {
-            await addRelation(bearer, body.aptId, body.isLike);
+            console.log('Body: ' + JSON.stringify(body));
+            const userId = await verifyUser(bearer);
+            console.log('Adding relation for user: ' + userId + ' and apartment: ' + body.aptId);
+            await addRelation(bearer, userId, body.aptId, body.isLike);
+            console.log('Relation added');
             return new Response('{"status": "OK"}', {
                 status: 201,
                 headers: { 'Content-Type': 'application/json' },
@@ -148,7 +156,8 @@ likeRoutes.use(bearer()).put(
     '/',
     async ({ bearer, body }) => {
         try {
-            await updateRelation(bearer, body.aptId, body.isLike);
+            const userId = await verifyUser(bearer);
+            await updateRelation(userId, body.aptId, body.isLike);
             return new Response('{"status": "OK"}', {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' },
@@ -185,7 +194,8 @@ likeRoutes.use(bearer()).delete(
     '/',
     async ({ bearer, body }) => {
         try {
-            await deleteRelation(bearer, body.aptId);
+            const userId = await verifyUser(bearer);
+            await deleteRelation(userId, body.aptId);
             return new Response(null, { status: 204 });
         } catch (error) {
             if (error instanceof HttpError) {
@@ -218,9 +228,10 @@ likeRoutes.use(bearer()).get(
     '/noRelations',
     async ({ bearer, query }) => {
         try {
-            const skip = query.skip ? parseInt(query.skip) : 0;
             const limit = query.limit ? parseInt(query.limit) : 10;
-            return await getApartmentsNoRelations(bearer, skip, limit);
+            const userId = await verifyUser(bearer);
+            console.log('Getting recommended apartments for user: ' + userId);
+            return await getRecommendedApartments(bearer, userId, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{"message": "${error.message}"}`, {
@@ -249,7 +260,10 @@ likeRoutes.use(bearer()).post(
     '/aptNode',
     async ({ bearer, body }) => {
         try {
-            await createAppartmentNode(bearer, body.aptId);
+            console.log('Body: ' + JSON.stringify(body));
+            await verifyUser(bearer);
+            console.log('Creating apartment node for aptId: ' + body.aptId);
+            await createApartmentNode(body.aptId);
             return new Response('{"status": "OK"}', {
                 status: 201,
                 headers: { 'Content-Type': 'application/json' },
@@ -285,7 +299,8 @@ likeRoutes.use(bearer()).post(
     '/userNode',
     async ({ bearer }) => {
         try {
-            createUserNode(bearer);
+            const userId = await verifyUser(bearer);
+            createUserNode(userId);
             return new Response('{"status": "OK"}', {
                 status: 201,
                 headers: { 'Content-Type': 'application/json' },
@@ -313,5 +328,20 @@ likeRoutes.use(bearer()).post(
         },
     },
 );
+
+likeRoutes.post('/generateRecommendations', async () => {
+    try {
+        await generateRecommendations();
+    } catch (err : any) {
+        return new Response(`{"message": "Failed to generate recommendations: ${err.message}"}` , {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+    return new Response('{"status": "Recommendation generated"}', {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+    });
+});
 
 export { likeRoutes };

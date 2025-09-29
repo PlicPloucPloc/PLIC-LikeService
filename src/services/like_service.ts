@@ -11,24 +11,19 @@ import {
     getUserNode,
     getDislikes,
     fetchApartmentNoRelations,
+    getRelationsUnpaginated,
 } from '../data/relations';
 import { HttpError } from 'elysia-http-error';
-import { getUser } from '../data/users';
 import { fetchApartment, fetchApartmentInfo } from '../data/apartments';
 import { relation } from '../models/relation';
 import { relation_type } from '../models/relation_type';
 import apartment_info from '../models/apartment_info';
 
-async function addRelation(bearer: string, aptId: number, isLike: boolean): Promise<void> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
-
+export async function addRelation(bearer: string,userId: string, aptId: number, isLike: boolean): Promise<void> {
     if (!(await fetchApartment(bearer, aptId))) {
         throw HttpError.NotFound('Apartment not found');
     }
-    if (!((await getUserNode(userId)).length > 0)) {
+    if ((await getUserNode(userId)).length == 0){ // TODO Remove when user workflow has been updated
         await addUser(userId);
     }
 
@@ -48,11 +43,7 @@ async function addRelation(bearer: string, aptId: number, isLike: boolean): Prom
     }
 }
 
-async function deleteRelation(bearer: string, aptId: number): Promise<void> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
+export async function deleteRelation(userId: string, aptId: number): Promise<void> {
     if ((await getApartment(aptId)).length == 0 || (await getUserNode(userId)).length == 0) {
         console.error('Relation not found');
         throw HttpError.NotFound('Relation not found');
@@ -60,11 +51,7 @@ async function deleteRelation(bearer: string, aptId: number): Promise<void> {
     await removeRelation(userId, aptId);
 }
 
-async function updateRelation(bearer: string, aptId: number, isLike: boolean): Promise<void> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
+export async function updateRelation(userId: string, aptId: number, isLike: boolean): Promise<void> {
     if ((await getApartment(aptId)).length == 0 || (await getUserNode(userId)).length == 0) {
         console.error('Relation not found');
         throw HttpError.NotFound('Relation not found');
@@ -77,47 +64,33 @@ async function updateRelation(bearer: string, aptId: number, isLike: boolean): P
     }
 }
 
-async function getAllRelations(bearer: string, skip: number, limit: number): Promise<relation[]> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
-    console.log('In service');
+export async function getAllRelations(userId: string, skip: number, limit: number): Promise<relation[]> {
     const relations = await getRelations(userId, skip, limit);
     return Promise.all(
         relations.map(async (rel) => {
             console.log('r: ', rel.get('r').type);
             return new relation(
                 rel.get('r').type,
-                await getApartmentInfo(bearer, rel.get('a').properties.id),
+                await getApartmentInfo(userId, rel.get('a').properties.id),
             );
         }),
     );
 }
 
-async function getApartmentsNoRelations(
-    bearer: string,
+export async function getApartmentsNoRelations(
+    userId: string,
     skip: number,
     limit: number,
 ): Promise<{ aptIds: number[] }> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
     const apartments = await fetchApartmentNoRelations(userId, skip, limit);
     return { aptIds: apartments.map((apt) => apt.get('a').properties.id) };
 }
 
-async function getAllLikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
+export async function getAllLikes(bearer: string, userId: string, skip: number, limit: number): Promise<relation[]> {
     const relations = await getLikes(userId, skip, limit);
     return Promise.all(
         relations.map(
-            async (rel) =>
-                new relation(
+            async (rel) => new relation(
                     relation_type[relation_type.LIKE],
                     await getApartmentInfo(bearer, rel.get('a').properties.id),
                 ),
@@ -125,12 +98,7 @@ async function getAllLikes(bearer: string, skip: number, limit: number): Promise
     );
 }
 
-async function getAllDislikes(bearer: string, skip: number, limit: number): Promise<relation[]> {
-    const userId = await getUser(bearer);
-    console.log('UserId: ', userId);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
+export async function getAllDislikes(bearer: string, userId: string, skip: number, limit: number): Promise<relation[]> {
     const relations = await getDislikes(userId, skip, limit);
     return Promise.all(
         relations.map(
@@ -143,44 +111,21 @@ async function getAllDislikes(bearer: string, skip: number, limit: number): Prom
     );
 }
 
-async function getApartmentInfo(bearer: string, aptId: number): Promise<apartment_info> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
-    const aptInfo = await fetchApartmentInfo(bearer, aptId);
+export async function getApartmentInfo(userId: string, aptId: number): Promise<apartment_info> {
+    const aptInfo = await fetchApartmentInfo(userId, aptId);
     return aptInfo;
 }
 
-async function createAppartmentNode(bearer: string, aptId: number): Promise<void> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
+export async function createApartmentNode(aptId: number): Promise<void> {
     if ((await getApartment(aptId)).length == 0) {
         console.log('Creating Apt : ' + aptId);
         addAppartment(aptId);
     }
 }
 
-async function createUserNode(bearer: string): Promise<void> {
-    const userId = await getUser(bearer);
-    if (!userId) {
-        throw HttpError.Unauthorized('User do not exist');
-    }
+export async function createUserNode(userId: string): Promise<void> {
+    console.log('Creating user: ' + userId);
     if ((await getUserNode(userId)).length == 0) {
         addUser(userId);
     }
 }
-
-export {
-    addRelation,
-    deleteRelation,
-    updateRelation,
-    getAllRelations,
-    getAllLikes,
-    getAllDislikes,
-    createAppartmentNode,
-    createUserNode,
-    getApartmentsNoRelations,
-};
