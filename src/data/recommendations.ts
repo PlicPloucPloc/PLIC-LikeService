@@ -1,9 +1,9 @@
 import { driver } from '../libs/neo4j';
 
-async function generateRelationsGraph(): Promise<any[]> {
+export async function generateRelationsGraph(): Promise<any[]> {
     try {
         const { records } = await driver.executeQuery(
-            "MATCH (source:Person) OPTIONAL MATCH (source)-[r:LIKED]->(target:Apartment) RETURN gds.graph.project( 'relationsGraph', source, target, { relationshipProperties: r { strength: coalesce(r.strength, 1.0) } })"
+            "MATCH (source:Person) OPTIONAL MATCH (source)-[r:LIKE]->(target:Appartment) RETURN gds.graph.project( 'relationsGraph', source, target, { relationshipProperties: r { strength: coalesce(r.strength, 1.0) } })"
         );
 
         return records;
@@ -13,7 +13,7 @@ async function generateRelationsGraph(): Promise<any[]> {
     }
 }
 
-async function generateSimilarityGraph(): Promise<any[]> {
+export async function generateSimilarityGraph(): Promise<any[]> {
     try {
         const { records } = await driver.executeQuery(
             "CALL gds.nodeSimilarity.write.estimate('relationsGraph', {writeRelationshipType: 'SIMILAR', writeProperty: 'score'}) YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory"
@@ -26,20 +26,15 @@ async function generateSimilarityGraph(): Promise<any[]> {
     }
 }
 
-async function getSimilarUsers(id: string) {
-    try {
-        const { records } = await driver.executeQuery(
-            `CALL gds.nodeSimilarity.stream('relationsGraph') YIELD node1, node2, similarity WHERE gds.util.asNode(node1).id = ${id} RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity ORDER BY similarity DESCENDING, Person1, Person2 LIMIT 10`
-        );
+export async function getSimilarUsers(id: string) {
+    const { records } = await driver.executeQuery(
+        `CALL gds.nodeSimilarity.stream('relationsGraph') YIELD node1, node2, similarity WHERE gds.util.asNode(node1).id = '${id}' RETURN gds.util.asNode(node1).id AS Person1, gds.util.asNode(node2).id AS Person2, similarity ORDER BY similarity DESCENDING, Person1, Person2 LIMIT 10`
+    );
 
-        return records;
-    } catch (err: any) {
-        console.error('Failed to get similar users: ', err.cause);
-        throw err;
-    }
+    return records;
 }
 
-async function dropOldRelationsGraph(): Promise<void> {
+export async function dropOldRelationsGraph(): Promise<void> {
     try {
         await driver.executeQuery(
             "CALL gds.graph.drop('relationsGraph',false) YIELD graphName"
@@ -49,5 +44,3 @@ async function dropOldRelationsGraph(): Promise<void> {
         throw err;
     }
 }
-
-export { generateSimilarityGraph, generateRelationsGraph, getSimilarUsers, dropOldRelationsGraph };
