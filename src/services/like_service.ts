@@ -17,7 +17,7 @@ import { HttpError } from 'elysia-http-error';
 import { fetchApartment, fetchApartmentInfo } from '../data/apartments';
 import { relation } from '../models/relation';
 import { relation_type } from '../models/relation_type';
-import apartment_info from '../models/apartment_info';
+import { apartment_info } from '../models/apartment_info';
 
 export async function addRelation(bearer: string,userId: string, aptId: number, isLike: boolean): Promise<void> {
     if (!(await fetchApartment(bearer, aptId))) {
