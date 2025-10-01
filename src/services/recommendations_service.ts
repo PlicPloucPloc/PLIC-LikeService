@@ -44,9 +44,6 @@ async function generateRecommendedApartmentsList(bearer: string, userId: string)
             console.log('Likes found');
             apartments.forEach((apt) => {
                 const aptId = apt.apt.apartment_id.toString();
-                console.log('Processing apartment: ', aptId);
-                console.log('Apertment included in already related: ', aptRel.includes(aptId));
-                console.log('Apartment : ', aptId, ' : ', aptRel[0]);
                 if (!recommendedApts.includes(aptId) && !aptRel.includes(aptId)){
                     recommendedApts.push(aptId);
                     console.log('Added apartment to recommendations: ', aptId);
@@ -79,7 +76,6 @@ async function getRecommendedApartments(bearer: string, userId: string, limit: n
     }
     console.log('Generated new recommendations, fetching from cache.');
     for (let i = 0; i < limit-1; i++){
-        console.log('Popping recommendation ', i+1);
         recommendedApt = await popCachedApartment(userId);
         console.log('Popped cached recommendation: ', recommendedApt);
         if (!recommendedApt) {
