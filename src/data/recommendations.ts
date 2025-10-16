@@ -44,3 +44,14 @@ export async function dropOldRelationsGraph(): Promise<void> {
         throw err;
     }
 }
+
+export async function checkSimilarityGraph() : Promise<any>{
+    try {
+        const { records } = await driver.executeQuery(`CALL gds.graph.exists('relationsGraph') YIELD graphName, exists RETURN exists`);
+        return records[0].get('exists');
+    } catch (err: any) {
+        console.error('Failed to check similarity graph existence: ', err.cause);
+        throw err;
+    }
+
+}

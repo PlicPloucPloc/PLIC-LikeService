@@ -23,7 +23,7 @@ likeRoutes.use(bearer()).get(
             const skip = query.skip ? parseInt(query.skip) : 0;
             const limit = query.limit ? parseInt(query.limit) : 10;
             const userId = await verifyUser(bearer);
-            return await getAllRelations(userId, skip, limit);
+            return await getAllRelations(bearer, userId, skip, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{"message": "${error.message}"}`, {
