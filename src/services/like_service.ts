@@ -64,14 +64,14 @@ export async function updateRelation(userId: string, aptId: number, isLike: bool
     }
 }
 
-export async function getAllRelations(userId: string, skip: number, limit: number): Promise<relation[]> {
+export async function getAllRelations(bearer: string, userId: string, skip: number, limit: number): Promise<relation[]> {
     const relations = await getRelations(userId, skip, limit);
     return Promise.all(
         relations.map(async (rel) => {
             console.log('r: ', rel.get('r').type);
             return new relation(
                 rel.get('r').type,
-                await getApartmentInfo(userId, rel.get('a').properties.id),
+                await getApartmentInfo(bearer, rel.get('a').properties.id),
             );
         }),
     );
