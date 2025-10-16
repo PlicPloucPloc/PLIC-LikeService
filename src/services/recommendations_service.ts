@@ -1,4 +1,4 @@
-import { dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers } from "../data/recommendations";
+import { checkSimilarityGraph, dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers } from "../data/recommendations";
 import { cacheRecommendedApartments, popCachedApartment } from "../data/redis_cache";
 import { fetchApartmentWithZeroRelations, getRelationsUnpaginated } from "../data/relations";
 import { getAllLikes } from "./like_service";
@@ -68,6 +68,11 @@ async function getRecommendedApartments(bearer: string, userId: string, limit: n
     console.log('Popped cached recommendation: ', recommendedApt);
     let recommendedApts = [];
     if (!recommendedApt) {
+        if ((await checkSimilarityGraph()) == false) {
+            console.log('Similarity graph does not exist. Generating recommendations graph.');
+            await generateRecommendations();
+        }
+
         console.log('No cached recommendations found, generating new ones.');
         await generateRecommendedApartmentsList(bearer, userId);
     }
