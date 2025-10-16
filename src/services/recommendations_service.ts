@@ -1,6 +1,6 @@
 import { checkSimilarityGraph, dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers } from "../data/recommendations";
 import { cacheRecommendedApartments, popCachedApartment } from "../data/redis_cache";
-import { fetchApartmentWithZeroRelations, getRelationsUnpaginated } from "../data/relations";
+import { fetchApartmentNoRelations, fetchApartmentWithZeroRelations, getRelationsUnpaginated } from "../data/relations";
 import { getAllLikes } from "./like_service";
 
 async function generateRecommendations(): Promise<void> {
@@ -34,7 +34,8 @@ async function generateRecommendedApartmentsList(bearer: string, userId: string)
         return false;
     }
     var recommendedApts : string[] = [];
-    var count : number = 0;
+    var previousZeroRelAptsCount: number = 0;
+    var count = 0;
     const aptRel : string[] = (await getRelationsUnpaginated(userId)).map((rel) => rel.get('a').properties.id);
     console.log('Apartments already related to user: ', aptRel);
     for (const user of users) {
@@ -42,46 +43,41 @@ async function generateRecommendedApartmentsList(bearer: string, userId: string)
             console.log('Fetching likes for similar user: ', user);
             const apartments = await getAllLikes(bearer, user, 0, 10);
             console.log('Likes found');
+            var aptsAdded: number = 0;
             apartments.forEach((apt) => {
                 const aptId = apt.apt.apartment_id.toString();
                 if (!recommendedApts.includes(aptId) && !aptRel.includes(aptId)){
+                    aptsAdded++;
                     recommendedApts.push(aptId);
                     console.log('Added apartment to recommendations: ', aptId);
                 }
             });
-            if ( count == 9 ) {
-                break;
-            } 
-            count++;
+            if (aptsAdded < 10) {
+                (await fetchApartmentWithZeroRelations(previousZeroRelAptsCount,10 - aptsAdded))
+                    .map((apt) => recommendedApts.push(apt.get('a').properties.id));
+            }
+            previousZeroRelAptsCount += (10 - aptsAdded);
+            count+=10;
         } catch (err: any) {
             console.error('Failed to fetch likes for user ', user, ': ', err.cause);
         }
     }
+    (await fetchApartmentNoRelations(userId, 0,100-count))
+        .map((apt) => {
+            if (!recommendedApts.includes(apt.get('a').properties.id)){
+                recommendedApts.push(apt.get('a').properties.id)
+            }
+        });
+    
     console.log('Caching recommended apartments: ', recommendedApts);
     cacheRecommendedApartments(userId, recommendedApts);
     return true;
 }
 
-async function getRecommendedApartments(bearer: string, userId: string, limit: number): Promise<{aptIds: number[]}> {
-    console.log('Fetching recommended apartments for user: ', userId);
-    let recommendedApt : number|null = await popCachedApartment(userId);
-    console.log('Popped cached recommendation: ', recommendedApt);
+async function getRedisApts(userId: string, limit: number): Promise<number[]> {
     let recommendedApts = [];
-    if (!recommendedApt) {
-        if ((await checkSimilarityGraph()) == false) {
-            console.log('Similarity graph does not exist. Generating recommendations graph.');
-            await generateRecommendations();
-        }
-
-        console.log('No cached recommendations found, generating new ones.');
-        await generateRecommendedApartmentsList(bearer, userId);
-    }
-    else {
-        recommendedApts.push(recommendedApt);
-    }
-    console.log('Generated new recommendations, fetching from cache.');
-    for (let i = 0; i < limit-1; i++){
-        recommendedApt = await popCachedApartment(userId);
+    for (let i = 0; i < limit; i++){
+        let recommendedApt: number|null = await popCachedApartment(userId);
         console.log('Popped cached recommendation: ', recommendedApt);
         if (!recommendedApt) {
             console.log('No more cached recommendations available.');
@@ -89,9 +85,21 @@ async function getRecommendedApartments(bearer: string, userId: string, limit: n
         }
         recommendedApts.push(recommendedApt);
     }
+    return recommendedApts;
+}
+
+async function getRecommendedApartments(bearer: string, userId: string, limit: number): Promise<{aptIds: number[]}> {
+    console.log('Fetching recommended apartments for user: ', userId);
+    let recommendedApts: number[] = await getRedisApts(userId, limit);
     if (recommendedApts.length < limit) {
-        const zeroRelationsApts : number[] = (await fetchApartmentWithZeroRelations(0,limit - recommendedApts.length)).map((apt) => apt.get('a').properties.id);
-        recommendedApts.push.apply(recommendedApts, zeroRelationsApts);
+        if ((await checkSimilarityGraph()) == false) {
+            console.log('Similarity graph does not exist. Generating recommendations graph.');
+            await generateRecommendations();
+        }
+
+        console.log('No cached recommendations found, generating new ones.');
+        await generateRecommendedApartmentsList(bearer, userId);
+        recommendedApts = await getRedisApts(userId, limit);
     }
     console.log('Recommended apartments: ', recommendedApts);
     return {aptIds: recommendedApts};
