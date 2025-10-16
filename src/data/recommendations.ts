@@ -34,6 +34,14 @@ export async function getSimilarUsers(id: string) {
     return records;
 }
 
+export async function getSimilarUsersColloc(id: string, skip: number, limit: number) {
+    const { records } = await driver.executeQuery(
+        `CALL gds.nodeSimilarity.stream('relationsGraph') YIELD node1, node2, similarity WHERE gds.util.asNode(node1).id = '${id}' AND gds.util.asNode(node1).isColloc = 'true' RETURN gds.util.asNode(node1).id AS Person1, gds.util.asNode(node2).id AS Person2, similarity ORDER BY similarity DESCENDING, Person1, Person2 SKIP ${skip} LIMIT ${limit}`
+    );
+
+    return records;
+}
+
 export async function dropOldRelationsGraph(): Promise<void> {
     try {
         await driver.executeQuery(
@@ -53,5 +61,4 @@ export async function checkSimilarityGraph() : Promise<any>{
         console.error('Failed to check similarity graph existence: ', err.cause);
         throw err;
     }
-
 }

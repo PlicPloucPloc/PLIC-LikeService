@@ -1,9 +1,9 @@
-import { checkSimilarityGraph, dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers } from "../data/recommendations";
+import { checkSimilarityGraph, dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers, getSimilarUsersColloc } from "../data/recommendations";
 import { cacheRecommendedApartments, popCachedApartment } from "../data/redis_cache";
 import { fetchApartmentNoRelations, fetchApartmentWithZeroRelations, getRelationsUnpaginated } from "../data/relations";
 import { getAllLikes } from "./like_service";
 
-async function generateRecommendations(): Promise<void> {
+export async function generateRecommendations(): Promise<void> {
     try {
         await dropOldRelationsGraph();
         await generateRelationsGraph();
@@ -14,7 +14,7 @@ async function generateRecommendations(): Promise<void> {
     }
 }
 
-async function fetchSimilarUsers(id: string): Promise<string[]> {
+export async function fetchSimilarUsers(id: string): Promise<string[]> {
     try {
         const records = await getSimilarUsers(id);
         return records.map(record => record.get('Person2'));
@@ -88,7 +88,7 @@ async function getRedisApts(userId: string, limit: number): Promise<number[]> {
     return recommendedApts;
 }
 
-async function getRecommendedApartments(bearer: string, userId: string, limit: number): Promise<{aptIds: number[]}> {
+export async function getRecommendedApartments(bearer: string, userId: string, limit: number): Promise<{aptIds: number[]}> {
     console.log('Fetching recommended apartments for user: ', userId);
     let recommendedApts: number[] = await getRedisApts(userId, limit);
     if (recommendedApts.length < limit) {
@@ -104,4 +104,8 @@ async function getRecommendedApartments(bearer: string, userId: string, limit: n
     console.log('Recommended apartments: ', recommendedApts);
     return {aptIds: recommendedApts};
 }
-export { generateRecommendations, fetchSimilarUsers, getRecommendedApartments };
+
+export async function getRecommendedColloc(userId: string, skip: number, limit: number): Promise<{userIds: string[]}> {
+    let recommendedColloc = await getSimilarUsersColloc(userId, skip, limit);
+    return {userIds: recommendedColloc.map(record => record.get('Person2'))}
+}

@@ -12,6 +12,7 @@ import {
     getDislikes,
     fetchApartmentNoRelations,
     getRelationsUnpaginated,
+    updateUserCollocStatus,
 } from '../data/relations';
 import { HttpError } from 'elysia-http-error';
 import { fetchApartment, fetchApartmentInfo } from '../data/apartments';
@@ -128,4 +129,8 @@ export async function createUserNode(userId: string): Promise<void> {
     if ((await getUserNode(userId)).length == 0) {
         addUser(userId);
     }
+}
+
+export async function setUserCollocStatus(userId: string, isColloc: string): Promise<void> {
+    await updateUserCollocStatus(userId, isColloc);
 }

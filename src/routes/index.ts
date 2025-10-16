@@ -9,9 +9,10 @@ import {
     getAllDislikes,
     createUserNode,
     createApartmentNode,
+    setUserCollocStatus,
 } from '../services/like_service';
 import { HttpError } from 'elysia-http-error';
-import { generateRecommendations, getRecommendedApartments } from '../services/recommendations_service';
+import { generateRecommendations, getRecommendedApartments, getRecommendedColloc } from '../services/recommendations_service';
 import { verifyUser } from '../services/user_verification_service';
 
 const likeRoutes = new Elysia();
@@ -343,5 +344,62 @@ likeRoutes.post('/generateRecommendations', async () => {
         headers: { 'Content-Type': 'application/json' },
     });
 });
+
+likeRoutes.use(bearer()).get('/recommendedColloc', 
+    async ({query, bearer}) => {
+        try {
+            const userId = await verifyUser(bearer);
+            return await getRecommendedColloc(userId, query.skip ? parseInt(query.skip) : 0, query.limit ? parseInt(query.limit) : 10);
+        } catch (err : any) {
+            return new Response(`{"message": "Failed to update user colloc status: ${err.message}"}` , {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+    },
+    {
+        beforeHandle({ bearer, set }) {
+            if (!bearer) {
+                set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
+
+                return new Response(`{"message": "Bearer not found or invalid"}`, {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        },
+    }
+);
+
+
+likeRoutes.use(bearer()).put('/allowColloc', 
+    async ({query, bearer}) => {
+        try {
+            const userId = await verifyUser(bearer);
+            await setUserCollocStatus(userId, query.allowColloc);
+        } catch (err : any) {
+            return new Response(`{"message": "Failed to update user colloc status: ${err.message}"}` , {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+        return new Response('{"status": "User colloc status updated"}', {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    },
+    {
+        beforeHandle({ bearer, set }) {
+            if (!bearer) {
+                set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
+
+                return new Response(`{"message": "Bearer not found or invalid"}`, {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        },
+    }
+);
 
 export { likeRoutes };

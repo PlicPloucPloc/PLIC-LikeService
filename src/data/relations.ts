@@ -113,9 +113,19 @@ export async function getDislikes(userId: string, skip: number, limit: number) {
 
 export async function addUser(userId: string): Promise<void> {
     try {
-        await driver.executeQuery("Create (:Person {id:\'" + userId + "\'})");
+        await driver.executeQuery("Create (:Person {id:\'" + userId + "\', isColloc: false})");
     } catch (err: any) {
         console.error('Failed to add user: ', err.cause);
+        throw err;
+    }
+}
+
+export async function updateUserCollocStatus(id: string, isColloc: string) : Promise<void> {
+    try {
+        await driver.executeQuery(` MATCH (p:Person {id: '${id}'}) SET p.isColloc = '${isColloc}' RETURN p `);
+    }
+    catch (err: any) {
+        console.error('Failed to update user colloc status: ', err.cause);
         throw err;
     }
 }
