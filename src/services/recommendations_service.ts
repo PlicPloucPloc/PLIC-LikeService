@@ -5,7 +5,7 @@ import { cacheRecommendedApartments, popCachedApartment } from "../data/redis_ca
 import { fetchApartmentNoRelations, fetchApartmentWithZeroRelations, getRelationsUnpaginated } from "../data/relations";
 import { apartment_info } from "../models/apartment_info";
 import { coordinates } from "../models/coordinates";
-import { filters } from "../models/filters";
+import { Filters } from "../models/filters";
 import { getAllLikes } from "./like_service";
 
 export async function generateRecommendations(): Promise<void> {
@@ -105,6 +105,7 @@ export function getDistance(origin: coordinates , destination: coordinates): num
     const dLat = Math.pow(Math.sin((lat2 - lat1)/2), 2);
     const dLon = Math.pow(Math.sin((lon2 - lon1)/2), 2);
     const dist = R * 2 * Math.asin(Math.sqrt(dLat + Math.cos(lat1) * Math.cos(lat2) * dLon));
+    console.log('Calculated distance: ', dist, ' km');
     return dist;
 }
 
@@ -124,7 +125,7 @@ async function filterApartments(bearer: string,
     return aptId;
 }
 
-export async function getRecommendedApartments(bearer: string, userId: string, limit: number, filters: filters,firstId: number = -1): Promise<{aptIds: number[]}> {
+export async function getRecommendedApartments(bearer: string, userId: string, limit: number, filters: Filters,firstId: number = -1): Promise<{aptIds: number[]}> {
     console.log('Fetching recommended apartments for user: ', userId);
     let recommendedApts: number[] = await getRedisApts(userId, limit);
     if (recommendedApts.length < limit) {

@@ -1,4 +1,4 @@
-export class filters {
+export class Filters {
     rent: number;
     location: string;
     size: number;

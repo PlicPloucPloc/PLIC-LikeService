@@ -13,7 +13,6 @@ export async function getCoordinates(address: string): Promise<{ lat: number; lo
     }
 
     const data = await response.json();
-    console.log('Coordinates received: ', data);
 
     return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
 }
