@@ -1,6 +1,6 @@
-import apartment_info from './apartment_info';
+import { apartment_info } from "./apartment_info";
 
-class relation {
+export class relation {
     type: string;
     apt: apartment_info;
 
@@ -9,5 +9,3 @@ class relation {
         this.apt = apt;
     }
 }
-
-export { relation };
