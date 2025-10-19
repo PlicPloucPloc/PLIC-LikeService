@@ -234,7 +234,8 @@ likeRoutes.use(bearer()).get(
             const filters: Filters = new Filters(
                 query.rent ? parseInt(query.rent) : 850,
                 query.location ? query.location : "Paris",
-                query.size ? parseInt(query.size) : 20,
+                query.min_size ? parseInt(query.size) : 20,
+                query.max_size ? parseInt(query.size) : 100,
                 query.is_furnished === 'true' ? true : false,
             ); 
 

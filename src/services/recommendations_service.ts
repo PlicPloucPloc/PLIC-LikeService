@@ -113,12 +113,13 @@ async function filterApartments(bearer: string,
                                 aptId: number,
                                 destination: coordinates,
                                 rent: number,
-                                surface: number,
+                                min_surface: number,
+                                max_surface: number,
                                 is_furnished: boolean): Promise<number> {
     var aptInfo: apartment_info = await fetchApartmentInfo(bearer, aptId);
     var origin: coordinates = await fetchApartmentCoordinates(bearer, aptId);
     var dist: number = getDistance(origin, destination);
-    if (dist > 30 || aptInfo.rent > rent || aptInfo.surface < surface || aptInfo.is_furnished != is_furnished) {
+    if (dist > 30 || aptInfo.rent > rent || aptInfo.surface < min_surface || aptInfo.surface > max_surface || aptInfo.is_furnished != is_furnished) {
         console.log('Apartment ', aptId, ' does not match user preferences. Filtering out.');
         return -1;
     }
@@ -145,7 +146,7 @@ export async function getRecommendedApartments(bearer: string, userId: string, l
     var filterAptsPromises: Promise<number>[] = [];
     var destination: coordinates = await getCoordinates(filters.location);
     recommendedApts.forEach((apt) => {
-        filterAptsPromises.push(filterApartments(bearer, apt,destination,filters.rent,filters.size, filters.is_furnished));
+        filterAptsPromises.push(filterApartments(bearer, apt,destination,filters.rent, filters.min_size, filters.max_size, filters.is_furnished));
     });
     recommendedApts = await Promise.all(filterAptsPromises).then((results) => results.filter((aptId) => aptId != -1));
     if (recommendedApts.length < limit) {
