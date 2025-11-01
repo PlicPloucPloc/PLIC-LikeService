@@ -1,11 +1,11 @@
 import { checkSimilarityGraph, dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers, getSimilarUsersColloc } from "../data/recommendations";
-import { getCoordinates } from "../data/openstreetmap";
 import { cacheRecommendedApartments, popCachedApartment } from "../data/redis_cache";
 import { fetchApartmentNoRelations, fetchApartmentWithZeroRelations, getRelationsUnpaginated } from "../data/relations";
 import { coordinates } from "../models/coordinates";
 import { getAllLikes } from "./like_service";
 import { apartment_info } from "../models/apartment_info";
 import { fetchApartmentCoordinates, fetchApartmentInfo } from "../data/apartments";
+import { Filters } from "../models/filters";
 
 export async function generateRecommendations(): Promise<void> {
     try {
@@ -138,12 +138,13 @@ export async function getRecommendedApartments(bearer: string, userId: string, l
         await generateRecommendedApartmentsList(bearer, userId);
         recommendedApts = await getRedisApts(userId, limit);
     }
+    // Note: Si recommendedApts est vide la suite pete
     if (recommendedApts.includes(firstId)){
         return { aptIds: [] };
     }
     var firstRecId: number = recommendedApts[0];
     var filterAptsPromises: Promise<number>[] = [];
-    var destination: coordinates = await getCoordinates(filters.location);
+    var destination: coordinates = await fetchApartmentCoordinates(bearer, firstRecId);
     recommendedApts.forEach((apt) => {
         filterAptsPromises.push(filterApartments(bearer, apt,destination,filters.rent, filters.min_size, filters.max_size, filters.is_furnished));
     });

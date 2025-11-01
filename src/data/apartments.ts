@@ -30,7 +30,7 @@ export async function fetchApartmentInfo(bearer: String, id: number): Promise<ap
 }
 
 export async function fetchApartmentCoordinates(bearer: string, id: number): Promise<coordinates> {
-    console.log('Sending request for coordinates');
+    console.log('Sending request for coordinates of apartment id: ', id);
     const userUrl = (process.env.APT_URL || 'http://localhost:3000') + '/coordinates?apartment_id=' + id;
     const request = new Request(userUrl, {
         method: 'get',
