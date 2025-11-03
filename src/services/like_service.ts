@@ -133,3 +133,8 @@ export async function createUserNode(userId: string): Promise<void> {
 export async function setUserCollocStatus(userId: string, isColloc: string): Promise<void> {
     await updateUserCollocStatus(userId, isColloc);
 }
+
+export async function getUserCollocStatus(userId: string): Promise<boolean> {
+    var user = await getUserNode(userId);
+    return user[0].get('u').properties.isColloc == "true";
+}

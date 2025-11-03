@@ -10,6 +10,7 @@ import {
     createUserNode,
     createApartmentNode,
     setUserCollocStatus,
+    getUserCollocStatus,
 } from '../services/like_service';
 import { HttpError } from 'elysia-http-error';
 import { generateRecommendations, getRecommendedApartments, getRecommendedColloc } from '../services/recommendations_service';
@@ -389,6 +390,36 @@ likeRoutes.use(bearer()).put('/allowColloc',
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });
+    },
+    {
+        beforeHandle({ bearer, set }) {
+            if (!bearer) {
+                set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
+
+                return new Response(`{"message": "Bearer not found or invalid"}`, {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        },
+    }
+);
+
+likeRoutes.use(bearer()).get('/isColloc', 
+    async ({bearer}) => {
+        try {
+            const userId: string = await verifyUser(bearer);
+            const isColloc: boolean = await getUserCollocStatus(userId);
+            return new Response(`{"isCollocEnabled": "${isColloc}"}`, {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        } catch (err : any) {
+            return new Response(`{"message": "Failed to get user colloc status: ${err.message}"}` , {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
     },
     {
         beforeHandle({ bearer, set }) {
