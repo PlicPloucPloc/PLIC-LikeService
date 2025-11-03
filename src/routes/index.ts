@@ -14,7 +14,6 @@ import {
 import { HttpError } from 'elysia-http-error';
 import { generateRecommendations, getRecommendedApartments, getRecommendedColloc } from '../services/recommendations_service';
 import { verifyUser } from '../services/user_verification_service';
-import { Filters } from '../models/filters';
 
 const likeRoutes = new Elysia();
 
@@ -232,18 +231,10 @@ likeRoutes.use(bearer()).get(
         try {
             console.log("Query: ", query);
             const limit = query.limit ? parseInt(query.limit) : 10;
-            const filters: Filters = new Filters(
-                query.rent ? parseInt(query.rent) : 850,
-                query.location ? query.location : "Paris",
-                query.min_size ? parseInt(query.min_size) : 20,
-                query.max_size ? parseInt(query.max_size) : 100,
-                query.is_furnished === 'true' ? true : false,
-            ); 
 
-            console.log("Filter: ", filters);
             const userId = await verifyUser(bearer);
             console.log('Getting recommended apartments for user: ' + userId);
-            return await getRecommendedApartments(bearer, userId, limit, filters);
+            return await getRecommendedApartments(bearer, userId, limit);
         } catch (error) {
             if (error instanceof HttpError) {
                 return new Response(`{"message": "${error.message}"}`, {

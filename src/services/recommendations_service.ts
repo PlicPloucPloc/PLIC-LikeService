@@ -1,11 +1,7 @@
 import { checkSimilarityGraph, dropOldRelationsGraph, generateRelationsGraph, generateSimilarityGraph, getSimilarUsers, getSimilarUsersColloc } from "../data/recommendations";
 import { cacheRecommendedApartments, popCachedApartment } from "../data/redis_cache";
 import { fetchApartmentNoRelations, fetchApartmentWithZeroRelations, getRelationsUnpaginated } from "../data/relations";
-import { coordinates } from "../models/coordinates";
 import { getAllLikes } from "./like_service";
-import { apartment_info } from "../models/apartment_info";
-import { fetchApartmentCoordinates, fetchApartmentInfo } from "../data/apartments";
-import { Filters } from "../models/filters";
 
 export async function generateRecommendations(): Promise<void> {
     try {
@@ -90,42 +86,8 @@ async function getRedisApts(userId: string, limit: number): Promise<number[]> {
     return recommendedApts;
 }
 
-export function getDistance(origin: coordinates , destination: coordinates): number {
-    const R = 6371; // Radius of the earth in km
 
-    // Convert degrees to radians
-    const toRad = (value: number) => (value * Math.PI) / 180;
-    var lat1: number = toRad(origin.lat);
-    var lon1: number = toRad(origin.lon);
-    var lat2 = toRad(destination.lat);
-    var lon2 = toRad(destination.lon);
-    
-    // Calculate distance using Haversine formula
-    const dLat = Math.pow(Math.sin((lat2 - lat1)/2), 2);
-    const dLon = Math.pow(Math.sin((lon2 - lon1)/2), 2);
-    const dist = R * 2 * Math.asin(Math.sqrt(dLat + Math.cos(lat1) * Math.cos(lat2) * dLon));
-    console.log('Calculated distance: ', dist, ' km');
-    return dist;
-}
-
-async function filterApartments(bearer: string,
-                                aptId: number,
-                                destination: coordinates,
-                                rent: number,
-                                min_surface: number,
-                                max_surface: number,
-                                is_furnished: boolean): Promise<number> {
-    var aptInfo: apartment_info = await fetchApartmentInfo(bearer, aptId);
-    var origin: coordinates = await fetchApartmentCoordinates(bearer, aptId);
-    var dist: number = getDistance(origin, destination);
-    if (dist > 30 || aptInfo.rent > rent || aptInfo.surface < min_surface || aptInfo.surface > max_surface || aptInfo.is_furnished != is_furnished) {
-        console.log('Apartment ', aptId, ' does not match user preferences. Filtering out.');
-        return -1;
-    }
-    return aptId;
-}
-
-export async function getRecommendedApartments(bearer: string, userId: string, limit: number, filters: Filters,firstId: number = -1): Promise<{aptIds: number[]}> {
+export async function getRecommendedApartments(bearer: string, userId: string, limit: number): Promise<number[]> {
     console.log('Fetching recommended apartments for user: ', userId);
     let recommendedApts: number[] = await getRedisApts(userId, limit);
     if (recommendedApts.length < limit) {
@@ -138,26 +100,11 @@ export async function getRecommendedApartments(bearer: string, userId: string, l
         await generateRecommendedApartmentsList(bearer, userId);
         recommendedApts = await getRedisApts(userId, limit);
     }
-    // Note: Si recommendedApts est vide la suite pete
-    if (recommendedApts.includes(firstId)){
-        return { aptIds: [] };
-    }
-    var firstRecId: number = recommendedApts[0];
-    var filterAptsPromises: Promise<number>[] = [];
-    var destination: coordinates = await fetchApartmentCoordinates(bearer, firstRecId);
-    recommendedApts.forEach((apt) => {
-        filterAptsPromises.push(filterApartments(bearer, apt,destination,filters.rent, filters.min_size, filters.max_size, filters.is_furnished));
-    });
-    recommendedApts = await Promise.all(filterAptsPromises).then((results) => results.filter((aptId) => aptId != -1));
-    if (recommendedApts.length < limit) {
-        var ret = await getRecommendedApartments(bearer, userId, limit - recommendedApts.length, filters, firstId == -1 ? firstRecId : firstId);
-        recommendedApts = recommendedApts.concat(ret.aptIds);
-    }
     console.log("Final recommended apartments: ", recommendedApts);
-    return {aptIds: recommendedApts};
+    return recommendedApts;
 }
 
-export async function getRecommendedColloc(userId: string, skip: number, limit: number): Promise<{userIds: string[]}> {
+export async function getRecommendedColloc(userId: string, skip: number, limit: number): Promise<string[]> {
     let recommendedColloc = await getSimilarUsersColloc(userId, skip, limit);
-    return {userIds: recommendedColloc.map(record => record.get('Person2'))}
+    return recommendedColloc.map(record => record.get('Person2'))
 }

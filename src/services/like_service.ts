@@ -11,7 +11,6 @@ import {
     getUserNode,
     getDislikes,
     fetchApartmentNoRelations,
-    getRelationsUnpaginated,
     updateUserCollocStatus,
 } from '../data/relations';
 import { HttpError } from 'elysia-http-error';
