@@ -18,18 +18,19 @@ import { fetchApartment, fetchApartmentInfo } from '../data/apartments';
 import { relation } from '../models/relation';
 import { relation_type } from '../models/relation_type';
 import { apartment_info } from '../models/apartment_info';
+import { getLogger } from './logger';
+import { Logger } from 'winston';
+
+const logger: Logger = getLogger('Like');
 
 export async function addRelation(bearer: string,userId: string, aptId: number, isLike: boolean): Promise<void> {
     if (!(await fetchApartment(bearer, aptId))) {
         throw HttpError.NotFound('Apartment not found');
     }
-    if ((await getUserNode(userId)).length == 0){ // TODO Remove when user workflow has been updated
-        await addUser(userId);
-    }
 
-    console.log('Adding relation: ' + userId + ' : ' + aptId + ' : ' + isLike);
+    logger.info(`Adding relation: ${userId} : ${aptId} : ${isLike}`);
     if ((await getApartment(aptId)).length == 0) {
-        console.log('Creating Apt : ' + aptId);
+        logger.info(`Creating Apt : ${aptId}`);
         await addAppartment(aptId);
     }
     if ((await getRelation(userId, aptId)).length > 0) {
@@ -45,7 +46,7 @@ export async function addRelation(bearer: string,userId: string, aptId: number, 
 
 export async function deleteRelation(userId: string, aptId: number): Promise<void> {
     if ((await getApartment(aptId)).length == 0 || (await getUserNode(userId)).length == 0) {
-        console.error('Relation not found');
+        logger.error('Relation not found');
         throw HttpError.NotFound('Relation not found');
     }
     await removeRelation(userId, aptId);
@@ -53,7 +54,7 @@ export async function deleteRelation(userId: string, aptId: number): Promise<voi
 
 export async function updateRelation(userId: string, aptId: number, isLike: boolean): Promise<void> {
     if ((await getApartment(aptId)).length == 0 || (await getUserNode(userId)).length == 0) {
-        console.error('Relation not found');
+        logger.error('Relation not found');
         throw HttpError.NotFound('Relation not found');
     }
     await removeRelation(userId, aptId);
@@ -68,7 +69,7 @@ export async function getAllRelations(bearer: string, userId: string, skip: numb
     const relations = await getRelations(userId, skip, limit);
     return Promise.all(
         relations.map(async (rel) => {
-            console.log('r: ', rel.get('r').type);
+            logger.info('r: ', rel.get('r').type);
             return new relation(
                 rel.get('r').type,
                 await getApartmentInfo(bearer, rel.get('a').properties.id),
@@ -118,13 +119,13 @@ export async function getApartmentInfo(userId: string, aptId: number): Promise<a
 
 export async function createApartmentNode(aptId: number): Promise<void> {
     if ((await getApartment(aptId)).length == 0) {
-        console.log('Creating Apt : ' + aptId);
+        logger.info(`Creating Apt : ${aptId}`);
         addAppartment(aptId);
     }
 }
 
 export async function createUserNode(userId: string): Promise<void> {
-    console.log('Creating user: ' + userId);
+    logger.info(`Creating user: ${userId}`);
     if ((await getUserNode(userId)).length == 0) {
         addUser(userId);
     }

@@ -1,22 +1,11 @@
 import Elysia, { t } from 'elysia';
 import { bearer } from '@elysiajs/bearer';
-import {
-    addRelation,
-    deleteRelation,
-    updateRelation,
-    getAllRelations,
-    getAllLikes,
-    getAllDislikes,
-    createUserNode,
-    createApartmentNode,
-    setUserCollocStatus,
-    getUserCollocStatus,
-} from '../services/like_service';
-import { generateRecommendations, getRecommendedApartments, getRecommendedColloc } from '../services/recommendations_service';
-import { verifyUser } from '../services/user_verification_service';
 import { handleError, handleMissingBearer, handleResponse } from '../services/responseService';
 import { getLogger } from '../services/logger';
 import { Logger } from 'winston';
+import { verifyUser } from '../services/userVerificationService';
+import { addRelation, createApartmentNode, createUserNode, deleteRelation, getAllDislikes, getAllLikes, getAllRelations, getUserCollocStatus, setUserCollocStatus, updateRelation } from '../services/likeService';
+import { generateRecommendations, getRecommendedApartments, getRecommendedColloc, orderAptIds } from '../services/recommendationsService';
 
 const likeRoutes = new Elysia();
 const logger: Logger = getLogger('Routes');
@@ -148,7 +137,7 @@ likeRoutes.use(bearer()).get(
     '/noRelations',
     async ({ bearer, query }) => {
         try {
-            console.log("Query: ", query);
+            logger.info(`Query: ${query}`);
             const limit = query.limit ? parseInt(query.limit) : 10;
 
             const userId = await verifyUser(bearer);
@@ -164,6 +153,28 @@ likeRoutes.use(bearer()).get(
         },
     },
 );
+
+likeRoutes.use(bearer()).post(
+    '/order',
+    async ({ bearer, body }) => {
+        try {
+            const aptIds = body.aptIds;
+
+            const userId = await verifyUser(bearer);
+            return await orderAptIds(aptIds, userId);
+        } catch (error) {
+            return handleError(error);
+        }
+    },
+    {
+        body: t.Object({
+            aptIds: t.Array(t.Number()),
+        }),
+        beforeHandle({ bearer, set }) {
+            if (!bearer)  return handleMissingBearer(set); 
+        },
+    },
+)
 
 likeRoutes.use(bearer()).post(
     '/aptNode',

@@ -1,7 +1,7 @@
 import { HttpError } from 'elysia-http-error';
 
 export async function getUser(bearer: String): Promise<string> {
-    const userUrl = (process.env.USER_URL || 'http://localhost:3000') + '/id';
+    const userUrl = (process.env.USER_URL || 'http://localhost:3000') + '/';
     const request = new Request(userUrl, {
         method: 'get',
         headers: {
