@@ -5,7 +5,7 @@ import { fetchApartmentNoRelations, fetchApartmentWithZeroRelations, getRelation
 import { getLogger } from "./logger";
 import { getAllLikes } from "./likeService";
 import { relation } from "../models/relation";
-import { apartment_info } from "../models/apartment_info";
+import { handleResponse } from "./responseService";
 
 const logger: Logger = getLogger('Recommendation');
 
@@ -110,6 +110,7 @@ export async function getRecommendedColloc(userId: string, skip: number, limit: 
     return recommendedColloc.map(record => record.get('Person2'))
 }
 
-export async function orderAptIds(aptIds: number[], userId: string): Promise<apartment_info[]> {
-    return await orderByProximity(aptIds, userId);
+export async function orderAptIds(aptIds: number[], userId: string): Promise<Response> {
+    const apt_info: number[] = await orderByProximity(aptIds, userId);
+    return handleResponse(JSON.stringify(apt_info), 200);
 }

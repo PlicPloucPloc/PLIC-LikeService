@@ -74,7 +74,7 @@ likeRoutes.use(bearer()).post(
             const userId = await verifyUser(bearer);
             logger.info(`Adding relation for user: ${userId} and apartment: ${body.aptId}`);
             await addRelation(bearer, userId, body.aptId, body.isLike);
-            return handleResponse('{"status": "OK"}', 200);
+            return handleResponse('{"status": "Created"}', 201);
         } catch (error) {
             return handleError(error);
         }
@@ -96,7 +96,7 @@ likeRoutes.use(bearer()).put(
         try {
             const userId = await verifyUser(bearer);
             await updateRelation(userId, body.aptId, body.isLike);
-            return handleResponse('{"status": "OK"}', 200);
+            return handleResponse('{"status": "Updated"}', 200);
         } catch (error) {
             return handleError(error);
         }
