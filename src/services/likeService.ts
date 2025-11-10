@@ -12,6 +12,7 @@ import {
     getDislikes,
     fetchApartmentNoRelations,
     updateUserCollocStatus,
+    getRelationsPaginated,
 } from '../data/relations';
 import { HttpError } from 'elysia-http-error';
 import { fetchApartment, fetchApartmentInfo } from '../data/apartments';
@@ -65,8 +66,21 @@ export async function updateRelation(userId: string, aptId: number, isLike: bool
     }
 }
 
-export async function getAllRelations(bearer: string, userId: string, skip: number, limit: number): Promise<relation[]> {
-    const relations = await getRelations(userId, skip, limit);
+export async function getAllRelations(bearer: string, userId: string): Promise<relation[]> {
+    const relations = await getRelations(userId);
+    return Promise.all(
+        relations.map(async (rel) => {
+            logger.info('r: ', rel.get('r').type);
+            return new relation(
+                rel.get('r').type,
+                await getApartmentInfo(bearer, rel.get('a').properties.id),
+            );
+        }),
+    );
+}
+
+export async function getAllRelationsPaginated(bearer: string, userId: string, skip: number, limit: number): Promise<relation[]> {
+    const relations = await getRelationsPaginated(userId, skip, limit);
     return Promise.all(
         relations.map(async (rel) => {
             logger.info('r: ', rel.get('r').type);

@@ -39,8 +39,21 @@ export async function getRelation(userId: string, aptId: number) {
         throw err;
     }
 }
+export async function getRelations(userId: string) {
+    try {
+        const { records } = await driver.executeQuery(
+            "MATCH (p:Person {id:\'" +
+                userId +
+                "\'})-[r]->(a:Appartment) RETURN r, a" 
+        );
+        return records;
+    } catch (err: any) {
+        console.error('Failed to get relations: ', err.cause);
+        throw err;
+    }
+}
 
-export async function getRelations(userId: string, skip: number, limit: number) {
+export async function getRelationsPaginated(userId: string, skip: number, limit: number) {
     console.log(`Fetching relations for user: ${userId} with skip: ${skip} and limit: ${limit}`);
     try {
         const { records } = await driver.executeQuery(

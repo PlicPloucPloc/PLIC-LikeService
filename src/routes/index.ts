@@ -4,7 +4,7 @@ import { handleError, handleMissingBearer, handleResponse } from '../services/re
 import { getLogger } from '../services/logger';
 import { Logger } from 'winston';
 import { verifyUser } from '../services/userVerificationService';
-import { addRelation, createApartmentNode, createUserNode, deleteRelation, getAllDislikes, getAllLikes, getAllRelations, getUserCollocStatus, setUserCollocStatus, updateRelation } from '../services/likeService';
+import { addRelation, createApartmentNode, createUserNode, deleteRelation, getAllDislikes, getAllLikes, getAllRelations, getAllRelationsPaginated, getUserCollocStatus, setUserCollocStatus, updateRelation } from '../services/likeService';
 import { generateRecommendations, getRecommendedColloc, orderAptIds } from '../services/recommendationsService';
 
 const likeRoutes = new Elysia();
@@ -14,10 +14,13 @@ likeRoutes.use(bearer()).get(
     '/all',
     async ({ bearer, query }) => {
         try {
+            const userId = await verifyUser(bearer);
+            if (!query.skip && !query.limit){
+                return await getAllRelations(bearer, userId);
+            }
             const skip = query.skip ? parseInt(query.skip) : 0;
             const limit = query.limit ? parseInt(query.limit) : 10;
-            const userId = await verifyUser(bearer);
-            return await getAllRelations(bearer, userId, skip, limit);
+            return await getAllRelationsPaginated(bearer, userId, skip, limit);
         } catch (error) {
             return handleError(error);
         }
@@ -63,27 +66,6 @@ likeRoutes.use(bearer()).get(
     {
         beforeHandle({ bearer, set }) {
             if (!bearer)  return handleMissingBearer(set); 
-        },
-    },
-);
-
-likeRoutes.use(bearer()).get(
-    '/noRelations',
-    async ({ bearer, query }) => {
-        try {
-            logger.info(`Query: ${query}`);
-            const limit = query.limit ? parseInt(query.limit) : 10;
-
-            const userId = await verifyUser(bearer);
-            logger.info(`Getting recommended apartments for user: ${userId}`);
-            return await getRecommendedApartments(bearer, userId, limit);
-        } catch (error) {
-            return handleError(error);
-        }
-    },
-    {
-        beforeHandle({ bearer, set }) {
-            if (!bearer)  return handleMissingBearer(set);
         },
     },
 );
