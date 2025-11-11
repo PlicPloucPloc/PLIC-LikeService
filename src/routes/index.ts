@@ -121,7 +121,7 @@ likeRoutes.use(bearer()).delete(
         try {
             const userId = await verifyUser(bearer);
             await deleteRelation(userId, body.aptId);
-            return handleResponse('{"status": "Deleted"}', 204);
+            return handleResponse(null, 204);
         } catch (error) {
             return handleError(error);
         }
@@ -247,7 +247,7 @@ likeRoutes.use(bearer()).get('/isColloc',
         try {
             const userId: string = await verifyUser(bearer);
             const isColloc: boolean = await getUserCollocStatus(userId);
-            return handleResponse(`{"isCollocEnabled": "${isColloc}"}`, 200)
+            return handleResponse(`{"isCollocEnabled": ${isColloc}}`, 200)
         } catch (error) {
             return handleError(error);
         }

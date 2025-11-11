@@ -12,7 +12,7 @@ export function handleError(error: any) : Response {
     return handleResponse(`{"Server Error": "${error.message}"}`, 500);
 }
 
-export function handleResponse(content: string, status: number){
+export function handleResponse(content: string | null, status: number){
     return new Response(content, {
         status: status,
         headers: { 'Content-Type': 'application/json' },

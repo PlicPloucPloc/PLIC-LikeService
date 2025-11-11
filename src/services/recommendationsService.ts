@@ -17,8 +17,8 @@ export async function fetchSimilarUsers(id: string): Promise<string[]> {
 }
 
 export async function getRecommendedColloc(userId: string, skip: number, limit: number): Promise<string[]> {
-    if (await checkSimilarityGraph()){
-            logger.info('Similarity graph does not exist. Generating recommendations graph.');
+    if (!await checkSimilarityGraph()){
+        logger.info('Similarity graph does not exist. Generating recommendations graph.');
         await generateRecommendations();
     }
     let recommendedColloc = await getSimilarUsersColloc(userId, skip, limit);
