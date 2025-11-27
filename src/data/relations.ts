@@ -1,4 +1,8 @@
+import { Logger } from 'winston';
 import { driver } from '../libs/neo4j';
+import { getLogger } from '../services/logger';
+
+const logger: Logger = getLogger('Relations');
 
 export async function getUserNode(userId: string) {
     try {
@@ -7,7 +11,7 @@ export async function getUserNode(userId: string) {
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to get user: ', err.cause);
+        logger.error(`Failed to get user: ${err.cause}`);
         throw err;
     }
 }
@@ -19,7 +23,7 @@ export async function getApartment(aptId: number) {
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to get apartment: ', err.cause);
+        logger.error(`Failed to get apartment: ${err.cause}`);
         throw err;
     }
 }
@@ -35,13 +39,26 @@ export async function getRelation(userId: string, aptId: number) {
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to get apartment: ', err.cause);
+        logger.error(`Failed to get apartment: ${err.cause}`);
+        throw err;
+    }
+}
+export async function getRelations(userId: string) {
+    try {
+        const { records } = await driver.executeQuery(
+            "MATCH (p:Person {id:\'" +
+                userId +
+                "\'})-[r]->(a:Appartment) RETURN r, a" 
+        );
+        return records;
+    } catch (err: any) {
+        logger.error(`Failed to get relations: ${err.cause}`);
         throw err;
     }
 }
 
-export async function getRelations(userId: string, skip: number, limit: number) {
-    console.log(`Fetching relations for user: ${userId} with skip: ${skip} and limit: ${limit}`);
+export async function getRelationsPaginated(userId: string, skip: number, limit: number) {
+    logger.info(`Fetching relations for user: ${userId} with skip: ${skip} and limit: ${limit}`);
     try {
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" +
@@ -54,13 +71,13 @@ export async function getRelations(userId: string, skip: number, limit: number) 
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to get relations: ', err.cause);
+        logger.error(`Failed to get relations: ${err.cause}`);
         throw err;
     }
 }
 
 export async function getRelationsUnpaginated(userId: string) {
-    console.log(`Fetching relations for user: ${userId}`);
+    logger.info(`Fetching relations for user: ${userId}`);
     try {
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" +
@@ -69,7 +86,7 @@ export async function getRelationsUnpaginated(userId: string) {
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to get relations: ', err.cause);
+        logger.error(`Failed to get relations: ${err.cause}`);
         throw err;
     }
 }
@@ -87,14 +104,14 @@ export async function getLikes(userId: string, skip: number, limit: number) {
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to get apartment: ', err.cause);
+        logger.error(`Failed to get apartment: ${err.cause}`);
         throw err;
     }
 }
 
 export async function getDislikes(userId: string, skip: number, limit: number) {
     try {
-        console.log('Fetching dislikes for user: ' + userId);
+        logger.info(`Fetching dislikes for user: ${userId}`);
         const { records } = await driver.executeQuery(
             "MATCH (p:Person {id:\'" +
                 userId +
@@ -106,7 +123,7 @@ export async function getDislikes(userId: string, skip: number, limit: number) {
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to get apartment: ', err.cause);
+        logger.error(`Failed to get apartment: ${err.cause}`);
         throw err;
     }
 }
@@ -115,7 +132,7 @@ export async function addUser(userId: string): Promise<void> {
     try {
         await driver.executeQuery("Create (:Person {id:\'" + userId + "\', isColloc: false})");
     } catch (err: any) {
-        console.error('Failed to add user: ', err.cause);
+        logger.error(`Failed to add user: ${err.cause}`);
         throw err;
     }
 }
@@ -125,7 +142,7 @@ export async function updateUserCollocStatus(id: string, isColloc: string) : Pro
         await driver.executeQuery(` MATCH (p:Person {id: '${id}'}) SET p.isColloc = '${isColloc}' RETURN p `);
     }
     catch (err: any) {
-        console.error('Failed to update user colloc status: ', err.cause);
+        logger.error(`Failed to update user colloc status: ${err.cause}`);
         throw err;
     }
 }
@@ -134,14 +151,14 @@ export async function addAppartment(aptId: number): Promise<void> {
     try {
         await driver.executeQuery("Create (:Appartment {id:\'" + aptId + "\'})");
     } catch (err: any) {
-        console.error('Failed to add apartment: ', err.cause);
+        logger.error(`Failed to add apartment: ${err.cause}`);
         throw err;
     }
 }
 
 export async function addLike(userId: string, aptId: number): Promise<void> {
     try {
-        console.log('Adding LIKE relation between user: ' + userId + ' and apt: ' + aptId);
+        logger.info(`Adding LIKE relation between user: ${userId} and apt: ${aptId}`);
         await driver.executeQuery(
             "MATCH (u:Person {id:\'" +
                 userId +
@@ -151,7 +168,7 @@ export async function addLike(userId: string, aptId: number): Promise<void> {
                 'CREATE (u)-[r:LIKE]->(a) ',
         );
     } catch (err: any) {
-        console.error('Failed to create relation: ', err.cause);
+        logger.error(`Failed to create relation: ${err.cause}`);
         throw err;
     }
 }
@@ -167,7 +184,7 @@ export async function addDislike(userId: string, aptId: number): Promise<void> {
                 'CREATE (u)-[r:DISLIKE]->(a) ',
         );
     } catch (err: any) {
-        console.error('Failed to create relation: ', err.cause);
+        logger.error(`Failed to create relation: ${err.cause}`);
         throw err;
     }
 }
@@ -179,7 +196,7 @@ export async function removeUser(userId: string) {
         );
         return records;
     } catch (err: any) {
-        console.error('Failed to remove user: ', err.cause);
+        logger.error(`Failed to remove user: ${err.cause}`);
         throw err;
     }
 }
@@ -189,10 +206,10 @@ export async function removeAppartment(aptId: number) {
         const { records } = await driver.executeQuery(
             "DELETE (a:Appartment {id:\'" + aptId + "\'}) RETURN a",
         );
-        console.log('Result: ' + records);
+        logger.info(`Result: ${records}`);
         return records;
     } catch (err: any) {
-        console.error('Failed to remove apartment: ', err.cause);
+        logger.error(`Failed to remove apartment: ${err.cause}`);
         throw err;
     }
 }
@@ -207,7 +224,7 @@ export async function removeRelation(userId: string, aptId: number): Promise<voi
                 'DELETE r',
         );
     } catch (err: any) {
-        console.error('Failed to create relation: ', err.cause);
+        logger.error(`Failed to delete relation: ${err.cause}`);
         throw err;
     }
 }
@@ -218,7 +235,7 @@ export async function fetchApartmentNoRelations(
     limit: number,
 ): Promise<any[]> {
     try {
-        console.log('Fetching apartments with no relations for user: ' + userId);
+        logger.info(`Fetching apartments with no relations for user: ${userId}`);
         const { records } = await driver.executeQuery(
             'MATCH (p:Person {id:"' +
                 userId +
@@ -234,7 +251,7 @@ export async function fetchApartmentNoRelations(
 
         return records;
     } catch (err: any) {
-        console.error('Failed to get apartments: ', err.cause);
+        logger.error(`Failed to get apartments: ${err.cause}`);
         throw err;
     }
 }
@@ -253,7 +270,7 @@ export async function fetchApartmentWithZeroRelations(skip: number,limit: number
 
         return records;
     } catch (err: any) {
-        console.error('Failed to get apartments: ', err.cause);
+        logger.error(`Failed to get apartments: ${err.cause}`);
         throw err;
     }
 }

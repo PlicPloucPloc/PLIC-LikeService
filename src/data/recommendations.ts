@@ -62,3 +62,27 @@ export async function checkSimilarityGraph() : Promise<any>{
         throw err;
     }
 }
+
+export async function orderByProximity(aptIds: number[], userId: string) : Promise<number[]>{
+    const session = driver.session();
+    const parameters = {
+        ids: aptIds
+    }
+    const query =  `
+            MATCH (u:Person {id: '${userId}'})
+            UNWIND $ids AS targetApartmentId
+            OPTIONAL MATCH (a:Apartment {id: targetApartmentId})
+            OPTIONAL MATCH p=(u)-[*2..7]-(a)
+            RETURN targetApartmentId AS id, count(p) AS pathCount 
+                ORDER BY pathCount`;
+    try {
+        const result = await session.run(query, parameters);
+        return result.records.map(record => record.get('id'));
+    } catch (err: any) {
+        console.error('Failed to order apartment ids: ', err);
+        throw err;
+    } finally {
+        await session.close()
+    }
+
+} 
