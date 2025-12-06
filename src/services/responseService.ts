@@ -7,7 +7,7 @@ export function handleMissingBearer(set: any) : Response {
 
 export function handleError(error: any) : Response {
     if (error instanceof HttpError ) {
-        return handleResponse(`{"Error": "${error.message}"}`, error.statusCode);
+        return handleResponse(`{"message": "${error.message}"}`, error.statusCode);
     }
     return handleResponse(`{"Server Error": "${error.message}"}`, 500);
 }
